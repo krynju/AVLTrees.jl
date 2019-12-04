@@ -1,0 +1,4 @@
+name = "AVL"
+uuid = "4459d02e-7d0b-4014-b2a2-e38a540ff820"
+authors = ["krynju <gulinski.krystian@gmail.com>"]
+version = "0.1.0"
