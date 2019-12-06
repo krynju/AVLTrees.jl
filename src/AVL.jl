@@ -2,7 +2,7 @@ module AVL
 
 import Base.insert!
 
-include("model.jl")
+include("tree.jl")
 
 export Node, AVLTree, insert!
 end # module
