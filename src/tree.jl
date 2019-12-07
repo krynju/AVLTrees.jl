@@ -9,7 +9,7 @@ mutable struct Node{K,D}
     bf::Int8
 end # Node
 
-Node(key, data) = Node(key, data, nothing, nothing, nothing,Int8(0))
+Node(key, data) = Node(key, data, nothing, nothing, nothing, Int8(0))
 Node(key, data, parent) = Node(key, data, parent, nothing, nothing, Int8(0))
 
 mutable struct AVLTree{K,D}
@@ -44,8 +44,10 @@ function insert!(tree::AVLTree, key, data)
         tree.root = Node(key, data)
     elseif key < parent.key
         parent.left = Node(key, data, parent)
+        balance(tree, parent, true)
     elseif key > parent.key
         parent.right = Node(key, data, parent)
+        balance(tree, parent, false)
     end
 
     return
@@ -58,8 +60,48 @@ end # function
 
 documentation
 """
-function balance(node::Node)
+function balance(tree::AVLTree, node::Node, left_insertion::Bool)
+    while node != nothing
+        if left_insertion
+            node.bf -= 1
+        else
+            node.bf += 1
+        end
+        
+        node, height_changed = rebalance(tree, node)
 
+        if height_changed
+            break
+        end
+
+        left_insertion = node.parent != nothing && node.parent.left == node
+        node = node.parent
+    end
+end # function
+
+"""
+    rebalance(node::Node)
+
+documentation
+"""
+function rebalance(tree::AVLTree, node::Node)
+    if node.bf == 2
+        height_changed = node.right.bf != 0
+        if node.right.bf == -1
+            rotate_right(tree, node.right)
+        end
+        node = rotate_left(tree, node)
+        return node, height_changed
+    elseif node.bf == -2
+        height_changed = node.left.bf != 0
+        if node.left.bf == 1
+            rotate_left(tree, node.left)
+        end
+        node = rotate_right(tree, node)
+        return node, height_changed
+    else
+        return node, node.bf == 0
+    end
 end # function
 
 function rotate_left(t::AVLTree, x::Node)
