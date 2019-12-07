@@ -1,5 +1,3 @@
-
-
 mutable struct Node{K,D}
     key::K
     data::D
@@ -9,22 +7,24 @@ mutable struct Node{K,D}
     bf::Int8
 end # Node
 
-Node(key, data) = Node(key, data, nothing, nothing, nothing, Int8(0))
-Node(key, data, parent) = Node(key, data, parent, nothing, nothing, Int8(0))
+Node(key::K, data::D) where {K,D} =
+    Node{K,D}(key, data, nothing, nothing, nothing, Int8(0))
+Node(key::K, data::D, parent::Union{Node{K,D},Nothing}) where {K,D} =
+    Node{K,D}(key, data, parent, nothing, nothing, Int8(0))
 
 mutable struct AVLTree{K,D}
     root::Union{Node{K,D},Nothing}
 end
 
-AVLTree() = AVLTree(nothing)
-
+AVLTree() = AVLTree{Any,Any}(nothing)
+AVLTree{K,D}() where {K,D} = AVLTree{K,D}(nothing)
 
 """
     insert!(args)
 
 documentation
 """
-function insert!(tree::AVLTree, key, data)
+function insert!(tree::AVLTree{K,D}, key::K, data::D) where {K,D}
     parent = nothing
     node = tree.root
 
@@ -60,14 +60,18 @@ end # function
 
 documentation
 """
-function balance(tree::AVLTree, node::Node, left_insertion::Bool)
+function balance(
+    tree::AVLTree{K,D},
+    node::Node{K,D},
+    left_insertion::Bool,
+) where {K,D}
     while node != nothing
         if left_insertion
             node.bf -= 1
         else
             node.bf += 1
         end
-        
+
         node, height_changed = rebalance(tree, node)
 
         if height_changed
@@ -84,7 +88,10 @@ end # function
 
 documentation
 """
-function rebalance(tree::AVLTree, node::Node)
+function rebalance(
+    tree::AVLTree{K,D},
+    node::Node{K,D}
+    )::Tuple{Node{K,D},Bool} where {K,D}
     if node.bf == 2
         height_changed = node.right.bf != 0
         if node.right.bf == -1
@@ -104,7 +111,7 @@ function rebalance(tree::AVLTree, node::Node)
     end
 end # function
 
-function rotate_left(t::AVLTree, x::Node)
+function rotate_left(t::AVLTree{K,D}, x::Node{K,D}) where {K,D}
     y = x.right
 
     x.right = y.left
@@ -131,7 +138,7 @@ function rotate_left(t::AVLTree, x::Node)
     return y
 end
 
-function rotate_right(t::AVLTree, x::Node)
+function rotate_right(t::AVLTree{K,D}, x::Node{K,D}) where {K,D}
     y = x.left
 
     x.left = y.right
