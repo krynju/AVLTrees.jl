@@ -4,5 +4,5 @@ import Base.insert!
 
 include("tree.jl")
 
-export AVLTree, insert!
+export AVLTree, insert!, erase!
 end # module

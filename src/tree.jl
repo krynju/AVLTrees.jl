@@ -88,10 +88,10 @@ end # function
 
 documentation
 """
-function rebalance(
-    tree::AVLTree{K,D},
-    node::Node{K,D}
-    )::Tuple{Node{K,D},Bool} where {K,D}
+function rebalance(tree::AVLTree{K,D}, node::Node{K,D})::Tuple{
+    Node{K,D},
+    Bool,
+} where {K,D}
     if node.bf == 2
         height_changed = node.right.bf != 0
         if node.right.bf == -1
@@ -164,3 +164,98 @@ function rotate_right(t::AVLTree{K,D}, x::Node{K,D}) where {K,D}
 
     return y
 end
+
+"""
+    erase!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
+
+documentation
+
+add balancing
+"""
+function erase!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
+    if node.left != nothing
+        if node.right != nothing
+            # left != nothing && right != nothing
+            temp = node.right
+            while temp.left != nothing
+                temp = temp.left
+            end
+            # switch spots completely
+            node.key = temp.key
+            node.data = temp.data
+            erase!(tree, temp)
+        else
+            # left != nothing && right == nothing
+            dir = parent_replace(tree, node, node.left)
+            node.left.parent = node.parent
+            balance_erase(tree, node.parent, dir)
+        end
+    else
+        if node.right != nothing
+            # left == nothing && right != nothing
+            dir = parent_replace(tree, node, node.right)
+            node.right.parent = node.parent
+            balance_erase(tree, node.parent, dir)
+        else
+            # left == nothing && right == nothing
+            dir = parent_replace(tree, node, nothing)
+            balance_erase(tree, node.parent, dir)
+        end
+    end
+end # function
+
+
+"""
+    balance_erase(args)
+
+documentation
+"""
+function balance_erase(
+    tree::AVLTree{K,D},
+    node::Union{Node{K,D}, Nothing},
+    left_erase::Union{Nothing,Bool},
+) where {K,D}
+    while node != nothing
+        if left_erase
+            node.bf += 1
+        else
+            node.bf -= 1
+        end
+
+        node, height_changed = rebalance(tree, node)
+
+        if !height_changed
+            break
+        end
+
+        left_erase = node.parent != nothing && node.parent.left == node
+        node = node.parent
+    end
+end # function
+
+"""
+    parent_replace(args)
+
+documentation
+"""
+function parent_replace(
+    tree::AVLTree{K,D},
+    node::Node{K,D},
+    replacement::Union{Nothing,Node{K,D}},
+) where {K,D}
+    if node.parent != nothing
+        if node.parent.right == node
+            node.parent.right = replacement
+            return false
+        else
+            node.parent.left = replacement
+            return true
+        end
+    else
+        if replacement != nothing
+            replacement.parent = nothing
+        end
+        tree.root = replacement
+        return nothing
+    end
+end # function
