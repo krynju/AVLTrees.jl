@@ -62,12 +62,24 @@
     # fill and erase test
     let
         t = AVLTree{Float64,Int}()
-        for i in randn(100)
+        for i in randn(1000)
             insert!(t, i, 0)
         end
         while t.root != nothing
             erase!(t, t.root)
         end
         @test t.root == nothing
+    end
+
+    # find test
+
+    let
+        t = AVLTree{Int,Int}()
+        for i = 1:1000
+            insert!(t,i,i)
+        end
+        res = find(t, 500)
+        @test 500 == res[1] && 500 == res[2]
+        @test nothing == find(t,1001)
     end
 end

@@ -259,3 +259,33 @@ function parent_replace(
         return nothing
     end
 end # function
+
+
+"""
+    find(tree::AVLTree{K,D}, key::K) where {K,D}
+
+documentation
+"""
+function find(tree::AVLTree{K,D}, key::K) where {K,D}
+    if is_empty(tree)
+        return nothing
+    end
+    node = tree.root
+    while node.key != key
+        if key < node.key
+            node = node.left
+        elseif key > node.key
+            node = node.right
+        end
+    end
+    return node.key, node.data
+end # function
+
+"""
+    is_empty(tree::AVLTree{K,D}) where {K,D}
+
+documentation
+"""
+function is_empty(tree::AVLTree{K,D}) where {K,D}
+    return tree.root == nothing
+end # function
