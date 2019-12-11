@@ -169,8 +169,6 @@ end
     erase!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
 
 documentation
-
-add balancing
 """
 function erase!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
     if node.left != nothing
@@ -187,14 +185,12 @@ function erase!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
         else
             # left != nothing && right == nothing
             dir = parent_replace(tree, node, node.left)
-            node.left.parent = node.parent
             balance_erase(tree, node.parent, dir)
         end
     else
         if node.right != nothing
             # left == nothing && right != nothing
             dir = parent_replace(tree, node, node.right)
-            node.right.parent = node.parent
             balance_erase(tree, node.parent, dir)
         else
             # left == nothing && right == nothing
@@ -206,13 +202,25 @@ end # function
 
 
 """
+    erase!(tree::AVLTree{K,D}, key::K) where {K,D}
+
+documentation
+"""
+function erase!(tree::AVLTree{K,D}, key::K) where {K,D}
+    node = find_node(tree, key)
+    if node != nothing
+        erase!(tree, node)
+    end
+end # function
+
+"""
     balance_erase(args)
 
 documentation
 """
 function balance_erase(
     tree::AVLTree{K,D},
-    node::Union{Node{K,D}, Nothing},
+    node::Union{Node{K,D},Nothing},
     left_erase::Union{Nothing,Bool},
 ) where {K,D}
     while node != nothing
@@ -234,14 +242,40 @@ function balance_erase(
 end # function
 
 """
-    parent_replace(args)
+    parent_replace(tree::AVLTree{K,D}, node::Node{K,D}, replacement::Node{K,D})
 
-documentation
+Replaces node with its only child. Used on nodes with a single child when erasing a node.
 """
 function parent_replace(
     tree::AVLTree{K,D},
     node::Node{K,D},
-    replacement::Union{Nothing,Node{K,D}},
+    replacement::Node{K,D},
+) where {K,D}
+    if node.parent != nothing
+        replacement.parent = node.parent
+        if node.parent.right == node
+            node.parent.right = replacement
+            return false
+        else
+            node.parent.left = replacement
+            return true
+        end
+    else
+        replacement.parent = nothing
+        tree.root = replacement
+        return nothing
+    end
+end # function
+
+"""
+    parent_replace(tree::AVLTree{K,D}, node::Node{K,D}, replacement::Nothing)
+
+Replaces node with nothing. Used on leaf nodes when erasing a node.
+"""
+function parent_replace(
+    tree::AVLTree{K,D},
+    node::Node{K,D},
+    replacement::Nothing,
 ) where {K,D}
     if node.parent != nothing
         if node.parent.right == node
@@ -252,9 +286,6 @@ function parent_replace(
             return true
         end
     else
-        if replacement != nothing
-            replacement.parent = nothing
-        end
         tree.root = replacement
         return nothing
     end
@@ -267,18 +298,41 @@ end # function
 documentation
 """
 function find(tree::AVLTree{K,D}, key::K) where {K,D}
-    if is_empty(tree)
-        return nothing
-    end
+
     node = tree.root
-    while node.key != key
+    while node != nothing
         if key < node.key
             node = node.left
         elseif key > node.key
             node = node.right
+        else
+            return node.key, node.data
         end
     end
-    return node.key, node.data
+
+    return nothing
+
+end # function
+
+
+"""
+    find_node(args)
+
+documentation
+"""
+function find_node(tree::AVLTree{K,D}, key::K) where {K,D}
+    node = tree.root
+    while node != nothing
+        if key < node.key
+            node = node.left
+        elseif key > node.key
+            node = node.right
+        else
+            return node
+        end
+    end
+
+    return nothing
 end # function
 
 """
