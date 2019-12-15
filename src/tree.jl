@@ -44,10 +44,10 @@ function insert!(tree::AVLTree{K,D}, key::K, data::D) where {K,D}
         tree.root = Node(key, data)
     elseif key < parent.key
         parent.left = Node(key, data, parent)
-        balance(tree, parent, true)
+        balance_insertion(tree, parent, true)
     elseif key > parent.key
         parent.right = Node(key, data, parent)
-        balance(tree, parent, false)
+        balance_insertion(tree, parent, false)
     end
 
     return
@@ -56,11 +56,11 @@ end # function
 
 
 """
-    balance(args)
+    balance_insertion(tree::AVLTree{K,D},node::Node{K,D},left_insertion::Bool) where {K,D}
 
 documentation
 """
-function balance(
+function balance_insertion(
     tree::AVLTree{K,D},
     node::Node{K,D},
     left_insertion::Bool,
@@ -185,17 +185,17 @@ function erase!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
         else
             # left != nothing && right == nothing
             dir = parent_replace(tree, node, node.left)
-            balance_erase(tree, node.parent, dir)
+            balance_erasion(tree, node.parent, dir)
         end
     else
         if node.right != nothing
             # left == nothing && right != nothing
             dir = parent_replace(tree, node, node.right)
-            balance_erase(tree, node.parent, dir)
+            balance_erasion(tree, node.parent, dir)
         else
             # left == nothing && right == nothing
             dir = parent_replace(tree, node, nothing)
-            balance_erase(tree, node.parent, dir)
+            balance_erasion(tree, node.parent, dir)
         end
     end
 end # function
@@ -214,11 +214,11 @@ function erase!(tree::AVLTree{K,D}, key::K) where {K,D}
 end # function
 
 """
-    balance_erase(args)
+    balance_erasion(args)
 
 documentation
 """
-function balance_erase(
+function balance_erasion(
     tree::AVLTree{K,D},
     node::Union{Node{K,D},Nothing},
     left_erase::Union{Nothing,Bool},
@@ -298,7 +298,6 @@ end # function
 documentation
 """
 function find(tree::AVLTree{K,D}, key::K) where {K,D}
-
     node = tree.root
     while node != nothing
         if key < node.key
@@ -309,9 +308,7 @@ function find(tree::AVLTree{K,D}, key::K) where {K,D}
             return node.key, node.data
         end
     end
-
     return nothing
-
 end # function
 
 
@@ -331,7 +328,6 @@ function find_node(tree::AVLTree{K,D}, key::K) where {K,D}
             return node
         end
     end
-
     return nothing
 end # function
 

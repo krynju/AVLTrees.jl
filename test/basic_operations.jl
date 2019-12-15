@@ -2,7 +2,7 @@
 @testset "basic operations" begin
     # root insertion test
     let
-        t = AVLTree{Int,Int}()
+        t = AVLTree{Int64,Int64}()
         insert!(t, 1, 2)
         @test t.root != nothing
         @test t.root.bf == 0
@@ -17,24 +17,42 @@
 
     # left rotation test
     let
-        t = AVLTree{Int,Int}()
+        t = AVLTree{Int64,Int64}()
         insert!(t, 1, 2)
         insert!(t, 2, 2)
         insert!(t, 3, 2)
-        @test t.root.bf == 0
-        @test t.root.left.bf == 0
-        @test t.root.right.bf == 0
+        @test t.root.bf == 0 && t.root.left.bf == 0 && t.root.right.bf == 0
+        @test t.root.key == 2 && t.root.left.key == 1 && t.root.right.key == 3
     end
 
-    # left rotation test
+    # right rotation test
     let
-        t = AVLTree{Int,Int}()
+        t = AVLTree{Int64,Int64}()
         insert!(t, 3, 2)
         insert!(t, 2, 2)
         insert!(t, 1, 2)
-        @test t.root.bf == 0
-        @test t.root.left.bf == 0
-        @test t.root.right.bf == 0
+        @test t.root.bf == 0 && t.root.left.bf == 0 && t.root.right.bf == 0
+        @test t.root.key == 2 && t.root.left.key == 1 && t.root.right.key == 3
+    end
+
+    # left-right rotation test
+    let
+        t = AVLTree{Int64,Int64}()
+        insert!(t, 3, 2)
+        insert!(t, 1, 2)
+        insert!(t, 2, 2)
+        @test t.root.bf == 0 && t.root.left.bf == 0 && t.root.right.bf == 0
+        @test t.root.key == 2 && t.root.left.key == 1 && t.root.right.key == 3
+    end
+
+    # right-left rotation test
+    let
+        t = AVLTree{Int64,Int64}()
+        insert!(t, 1, 2)
+        insert!(t, 3, 2)
+        insert!(t, 2, 2)
+        @test t.root.bf == 0 && t.root.left.bf == 0 && t.root.right.bf == 0
+        @test t.root.key == 2 && t.root.left.key == 1 && t.root.right.key == 3
     end
 
     # tree{Any,Any} test - TODO breaks - conversion errors
@@ -49,15 +67,15 @@
 
     # fill test
     let
-        t = AVLTree{Float64,Int}()
-        for i in randn(100)
+        t = AVLTree{Int64,Int64}()
+        for i in rand(Int64, 100)
             insert!(t, i, 0)
         end
     end
 
     # erase basic
     let
-        t = AVLTree{Int,Int}()
+        t = AVLTree{Int64,Int64}()
         insert!(t, 1, 2)
         insert!(t, 2, 2)
         insert!(t, 3, 2)
@@ -73,8 +91,8 @@
 
     # fill and erase all test
     let
-        t = AVLTree{Float64,Int}()
-        for i in randn(100)
+        t = AVLTree{Int64,Int64}()
+        for i in rand(Int64, 100)
             insert!(t, i, 0)
         end
         while t.root != nothing
@@ -91,14 +109,14 @@
             insert!(t, i, i)
         end
         for i in nums
-            erase!(t,i)
+            erase!(t, i)
         end
         @test t.root == nothing
     end
 
     # find test
     let
-        t = AVLTree{Int,Int}()
+        t = AVLTree{Int64,Int64}()
         for i = 1:1000
             insert!(t, i, i)
         end
@@ -106,6 +124,4 @@
         @test 500 == res[1] && 500 == res[2]
         @test nothing == find(t, 1001)
     end
-
-
 end
