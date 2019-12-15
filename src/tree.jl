@@ -12,6 +12,9 @@ Node(key::K, data::D) where {K,D} =
 Node(key::K, data::D, parent::Union{Node{K,D},Nothing}) where {K,D} =
     Node{K,D}(key, data, parent, nothing, nothing, Int8(0))
 
+Node{K,D}(key,data,parent) where {K,D} = Node{K,D}(key,data, parent, nothing,nothing,Int8(0))
+Node{K,D}(key,data) where {K,D} = Node{K,D}(key,data,nothing)
+
 mutable struct AVLTree{K,D}
     root::Union{Node{K,D},Nothing}
 end
@@ -19,12 +22,14 @@ end
 AVLTree() = AVLTree{Any,Any}(nothing)
 AVLTree{K,D}() where {K,D} = AVLTree{K,D}(nothing)
 
+
+
 """
     insert!(args)
 
 documentation
 """
-function insert!(tree::AVLTree{K,D}, key::K, data::D) where {K,D}
+function insert!(tree::AVLTree{K,D}, key, data) where {K,D}
     parent = nothing
     node = tree.root
 
@@ -41,12 +46,12 @@ function insert!(tree::AVLTree{K,D}, key::K, data::D) where {K,D}
     end
 
     if parent == nothing
-        tree.root = Node(key, data)
+        tree.root = Node{K,D}(key, data)
     elseif key < parent.key
-        parent.left = Node(key, data, parent)
+        parent.left = Node{K,D}(key, data, parent)
         balance_insertion(tree, parent, true)
     elseif key > parent.key
-        parent.right = Node(key, data, parent)
+        parent.right = Node{K,D}(key, data, parent)
         balance_insertion(tree, parent, false)
     end
 

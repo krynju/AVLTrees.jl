@@ -55,15 +55,15 @@
         @test t.root.key == 2 && t.root.left.key == 1 && t.root.right.key == 3
     end
 
-    # tree{Any,Any} test - TODO breaks - conversion errors
-    # let
-    #     t = AVLTree()
-    #     insert!(t, "item1", "item1")
-    #     @test t.root.key == "item1"
-    #     insert!(t, "item2", "item2")
-    #     insert!(t, "item3", "item3")
-    #     @test t.root.key == "item2"
-    # end
+    # tree{Any,Any} test
+    let
+        t = AVLTree()
+        insert!(t, "item1", "item1")
+        @test t.root.key == "item1"
+        insert!(t, "item2", "item2")
+        insert!(t, "item3", "item3")
+        @test t.root.key == "item2"
+    end
 
     # fill test
     let
