@@ -1,20 +1,9 @@
-mutable struct Node{K,D}
-    key::K
-    data::D
-    parent::Union{Node{K,D},Nothing}
-    left::Union{Node{K,D},Nothing}
-    right::Union{Node{K,D},Nothing}
-    bf::Int8
-end # Node
 
-Node(key::K, data::D) where {K,D} =
-    Node{K,D}(key, data, nothing, nothing, nothing, Int8(0))
-Node(key::K, data::D, parent::Union{Node{K,D},Nothing}) where {K,D} =
-    Node{K,D}(key, data, parent, nothing, nothing, Int8(0))
+"""
+    AVLTree
 
-Node{K,D}(key,data,parent) where {K,D} = Node{K,D}(key,data, parent, nothing,nothing,Int8(0))
-Node{K,D}(key,data) where {K,D} = Node{K,D}(key,data,nothing)
-
+struct
+"""
 mutable struct AVLTree{K,D}
     root::Union{Node{K,D},Nothing}
 end
@@ -22,6 +11,15 @@ end
 AVLTree() = AVLTree{Any,Any}(nothing)
 AVLTree{K,D}() where {K,D} = AVLTree{K,D}(nothing)
 
+function children(tree::AVLTree{K,D}) where {K,D}
+    return ifelse(tree.root == nothing, (), (tree.root,))
+end
+
+Base.show(io::IO, ::MIME"text/plain", tree::AVLTree{K,D}) where {K,D} =
+    print(io, "AVLTree{$(K),$(D)} with $(size(tree)) entries")
+
+printnode(io::IO, tree::AVLTree{K,D}) where {K,D} =
+    print(io, "AVLTree{$(K),$(D)} root")
 
 
 """
@@ -171,11 +169,11 @@ function rotate_right(t::AVLTree{K,D}, x::Node{K,D}) where {K,D}
 end
 
 """
-    erase!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
+    delete!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
 
 documentation
 """
-function erase!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
+function delete!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
     if node.left != nothing
         if node.right != nothing
             # left != nothing && right != nothing
@@ -186,50 +184,50 @@ function erase!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
             # switch spots completely
             node.key = temp.key
             node.data = temp.data
-            erase!(tree, temp)
+            delete!(tree, temp)
         else
             # left != nothing && right == nothing
             dir = parent_replace(tree, node, node.left)
-            balance_erasion(tree, node.parent, dir)
+            balance_deletion(tree, node.parent, dir)
         end
     else
         if node.right != nothing
             # left == nothing && right != nothing
             dir = parent_replace(tree, node, node.right)
-            balance_erasion(tree, node.parent, dir)
+            balance_deletion(tree, node.parent, dir)
         else
             # left == nothing && right == nothing
             dir = parent_replace(tree, node, nothing)
-            balance_erasion(tree, node.parent, dir)
+            balance_deletion(tree, node.parent, dir)
         end
     end
 end # function
 
 
 """
-    erase!(tree::AVLTree{K,D}, key::K) where {K,D}
+    delete!(tree::AVLTree{K,D}, key::K) where {K,D}
 
 documentation
 """
-function erase!(tree::AVLTree{K,D}, key::K) where {K,D}
+function delete!(tree::AVLTree{K,D}, key::K) where {K,D}
     node = find_node(tree, key)
     if node != nothing
-        erase!(tree, node)
+        delete!(tree, node)
     end
 end # function
 
 """
-    balance_erasion(args)
+    balance_deletion(args)
 
 documentation
 """
-function balance_erasion(
+function balance_deletion(
     tree::AVLTree{K,D},
     node::Union{Node{K,D},Nothing},
-    left_erase::Union{Nothing,Bool},
+    left_delete::Union{Nothing,Bool},
 ) where {K,D}
     while node != nothing
-        if left_erase
+        if left_delete
             node.bf += 1
         else
             node.bf -= 1
@@ -241,7 +239,7 @@ function balance_erasion(
             break
         end
 
-        left_erase = node.parent != nothing && node.parent.left == node
+        left_delete = node.parent != nothing && node.parent.left == node
         node = node.parent
     end
 end # function
@@ -302,7 +300,7 @@ end # function
 
 documentation
 """
-function find(tree::AVLTree{K,D}, key::K) where {K,D}
+function findkey(tree::AVLTree{K,D}, key::K) where {K,D}
     node = tree.root
     while node != nothing
         if key < node.key
@@ -310,7 +308,7 @@ function find(tree::AVLTree{K,D}, key::K) where {K,D}
         elseif key > node.key
             node = node.right
         else
-            return node.key, node.data
+            return node.data
         end
     end
     return nothing
@@ -343,4 +341,27 @@ documentation
 """
 function is_empty(tree::AVLTree{K,D}) where {K,D}
     return tree.root == nothing
+end # function
+
+"""
+    size(tree::AVLTree{K,D}) where {K,D}
+
+documentation
+"""
+function size(tree::AVLTree{K,D}) where {K,D}
+    return __size(tree.root, Int64(0))
+end # function
+
+
+"""
+    __size(args)
+
+documentation
+"""
+function __size(node::Union{Nothing,Node}, count::Int64)
+    if node == nothing
+        return count
+    end
+    count = __size(node.left, count + 1)
+    return __size(node.right, count)
 end # function
