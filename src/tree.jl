@@ -69,18 +69,11 @@ function balance_insertion(
     left_insertion::Bool,
 ) where {K,D}
     while node != nothing
-        if left_insertion
-            node.bf -= 1
-        else
-            node.bf += 1
-        end
-
+        node.bf += ifelse(left_insertion, -1, 1)
         node, height_changed = rebalance(tree, node)
-
         if height_changed
             break
         end
-
         left_insertion = node.parent != nothing && node.parent.left == node
         node = node.parent
     end
@@ -201,6 +194,7 @@ function delete!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
             balance_deletion(tree, node.parent, dir)
         end
     end
+    return
 end # function
 
 
@@ -227,18 +221,11 @@ function balance_deletion(
     left_delete::Union{Nothing,Bool},
 ) where {K,D}
     while node != nothing
-        if left_delete
-            node.bf += 1
-        else
-            node.bf -= 1
-        end
-
+        node.bf += ifelse(left_delete, 1, -1)
         node, height_changed = rebalance(tree, node)
-
         if !height_changed
             break
         end
-
         left_delete = node.parent != nothing && node.parent.left == node
         node = node.parent
     end
@@ -335,20 +322,11 @@ function find_node(tree::AVLTree{K,D}, key::K) where {K,D}
 end # function
 
 """
-    is_empty(tree::AVLTree{K,D}) where {K,D}
-
-documentation
-"""
-function is_empty(tree::AVLTree{K,D}) where {K,D}
-    return tree.root == nothing
-end # function
-
-"""
     size(tree::AVLTree{K,D}) where {K,D}
 
 documentation
 """
-function size(tree::AVLTree{K,D}) where {K,D}
+function size(tree::AVLTree)
     return __size(tree.root, Int64(0))
 end # function
 

@@ -10,6 +10,7 @@
         @test t.root.key == 1 && t.root.data == 2
         @test size(t) == 1
         insert!(t, 1, 10)
+        delete!(t, 999)
         @test t.root.data == 10
         @test size(t) == 1
     end
