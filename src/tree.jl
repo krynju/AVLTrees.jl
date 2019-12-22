@@ -327,7 +327,7 @@ end # function
 documentation
 """
 function size(tree::AVLTree)
-    return __size(tree.root, Int64(0))
+    return __size(tree.root)
 end # function
 
 
@@ -336,10 +336,9 @@ end # function
 
 documentation
 """
-function __size(node::Union{Nothing,Node}, count::Int64)
+function __size(node::Union{Nothing,Node})
     if node == nothing
-        return count
+        return 0
     end
-    count = __size(node.left, count + 1)
-    return __size(node.right, count)
-end # function
+    return __size(node.left) + __size(node.right) + 1
+end
