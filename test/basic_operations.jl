@@ -140,4 +140,18 @@
         @test nothing == findkey(t, 1001)
         @test size(t) == 1000
     end
+
+    #iteration test
+    let
+        t = AVLTree{Int64,Int64}()
+        for i = 1:1000
+            insert!(t, i, i)
+        end
+        s1 = Set{Tuple{Int64,Int64}}([(_x,_x) for _x in 1:1000])
+        s2 = Set{Tuple{Int64,Int64}}()
+        for i in t
+            push!(s2,i)
+        end
+        @test s1 == s2
+    end
 end
