@@ -12,7 +12,9 @@ keeping the balance factor. All balancing procedures are dynamically propagated
 
 ## Benchmark
 
-An overview of performance is shown in the table. Times are shown for an average of 1000 operations made at N elements in the structure.
+An overview of performance is shown below. Times are shown for an average of 1000 operations made at N elements in the structure.
+
+### Table
 
 | N    | insert [us]    | delete [us] | lookup [us] |
 | :------------- | :------------- | :-------| :---- |
@@ -21,3 +23,8 @@ An overview of performance is shown in the table. Times are shown for an average
 |   100000 |  260.794 | 107.378 |  114.014 |
 |  1000000 | 424.0  | 123.648 |  124.587 |
 | 10000000 | 659.088  |  135.373 | 134.609 |
+
+### Plot
+
+
+![benchmark results](https://github.com/krynju/AVL.jl/blob/master/benchmark/result.svg)
