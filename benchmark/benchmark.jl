@@ -29,11 +29,10 @@ search_vec = []
 x = [1000, 10000, 100000, 1000000, 10000000]
 
 for N in x
-
     global t = AVLTree{Int64,Int64}()
     rng = MersenneTwister(1111)
-    global nums = rand(rng,Int64, N)
-    global unique_nums = Vector{Int64}(undef,1000)
+    global nums = rand(rng, Int64, N)
+    global unique_nums = Vector{Int64}(undef, 1000)
     for i in pairs(unique_nums)
         r = rand(rng, Int64)
         while (r in nums)
@@ -50,8 +49,8 @@ for N in x
 
     t = AVLTree{Int64,Int64}()
     rng = MersenneTwister(1111)
-    nums = rand(rng,Int64, N)
-    unique_nums = Vector{Int64}(undef,1000)
+    nums = rand(rng, Int64, N)
+    unique_nums = Vector{Int64}(undef, 1000)
     for i in pairs(unique_nums)
         r = rand(rng, Int64)
         while (r in nums)
@@ -79,3 +78,17 @@ println("search_times : $search_vec")
 # plot(x, insertion_vec/1000, xscale=:log10, ylabel="us")
 # plot(x, deletion_vec/1000, xscale=:log10, ylabel="us")
 # plot(x, search_vec/1000, xscale=:log10, ylabel="us")
+
+
+plot(
+    x,
+    [insertion_vec / 1000, deletion_vec / 1000, search_vec / 1000],
+    xscale = :log10,
+    ylabel = "operation time [us]",
+    xlabel = "N",
+    markershape =[:diamond :utriangle :dtriangle],
+    labels= ["insert" "delete" "lookup"],
+    legend=:topleft,
+)
+
+savefig("result.svg")

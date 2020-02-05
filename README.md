@@ -12,9 +12,9 @@ keeping the balance factor. All balancing procedures are dynamically propagated
 
 ## Benchmark
 
-An overview of performance is shown in the table
+An overview of performance is shown in the table. Times are shown for an average of 1000 operations made at N elements in the structure.
 
-| N    | insert    | delete | lookup |
+| N    | insert [us]    | delete [us] | lookup [us] |
 | :------------- | :------------- | :-------| :---- |
 | 1000      |    86.039  |   67.768 |   67.433    |
 |10000 | 152.533 | 87.305 |   89.556 |
