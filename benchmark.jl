@@ -26,7 +26,7 @@ insertion_vec = []
 deletion_vec = []
 search_vec = []
 
-x = [1000, 10000, 100000]
+x = [1000, 10000, 100000, 1000000, 10000000]
 
 for N in x
 

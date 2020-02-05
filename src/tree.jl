@@ -11,16 +11,8 @@ end
 AVLTree() = AVLTree{Any,Any}(nothing)
 AVLTree{K,D}() where {K,D} = AVLTree{K,D}(nothing)
 
-function children(tree::AVLTree{K,D}) where {K,D}
-    return ifelse(isnothing(tree.root), (), (tree.root,))
-end
-
 Base.show(io::IO, ::MIME"text/plain", tree::AVLTree{K,D}) where {K,D} =
     print(io, "AVLTree{$(K),$(D)} with $(size(tree)) entries")
-
-printnode(io::IO, tree::AVLTree{K,D}) where {K,D} =
-    print(io, "AVLTree{$(K),$(D)} root")
-
 
 """
     insert!(args)
