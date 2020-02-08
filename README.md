@@ -27,4 +27,4 @@ An overview of performance is shown below. Times are shown for an average of 100
 ### Plot
 
 
-![benchmark results](https://github.com/krynju/AVL.jl/blob/master/benchmark/result.svg)
+![benchmark results](https://github.com/krynju/AVLTree.jl/blob/master/benchmark/result.svg)
