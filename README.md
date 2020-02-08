@@ -1,7 +1,7 @@
 # AVLTree
 
-[![Build Status](https://travis-ci.com/krynju/AVL.jl.svg?branch=master)](https://travis-ci.com/krynju/AVL.jl)
-[![codecov](https://codecov.io/gh/krynju/AVL.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/krynju/AVL.jl)
+[![Build Status](https://travis-ci.com/krynju/AVLTree.jl.svg?branch=master)](https://travis-ci.com/krynju/AVLTree.jl)
+[![codecov](https://codecov.io/gh/krynju/AVLTree.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/krynju/AVLTree.jl)
 
 AVL self-balancing tree written in pure Julia.
 
