@@ -1,4 +1,4 @@
-# AVLTree
+# AVLTrees
 
 [![Build Status](https://travis-ci.com/krynju/AVLTree.jl.svg?branch=master)](https://travis-ci.com/krynju/AVLTree.jl)
 [![codecov](https://codecov.io/gh/krynju/AVLTree.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/krynju/AVLTree.jl)

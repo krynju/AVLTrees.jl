@@ -1,4 +1,4 @@
-using AVL, BenchmarkTools
+using AVLTrees, BenchmarkTools
 using Random
 using Plots
 

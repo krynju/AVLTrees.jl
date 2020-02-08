@@ -1,4 +1,4 @@
-module AVLTree
+module AVLTrees
 
 import Base: insert!, delete!, size, iterate, eltype, length
 
