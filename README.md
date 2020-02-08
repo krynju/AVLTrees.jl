@@ -1,7 +1,7 @@
 # AVLTrees
 
-[![Build Status](https://travis-ci.com/krynju/AVLTree.jl.svg?branch=master)](https://travis-ci.com/krynju/AVLTree.jl)
-[![codecov](https://codecov.io/gh/krynju/AVLTree.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/krynju/AVLTree.jl)
+[![Build Status](https://travis-ci.com/krynju/AVLTrees.jl.svg?branch=master)](https://travis-ci.com/krynju/AVLTrees.jl)
+[![codecov](https://codecov.io/gh/krynju/AVLTrees.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/krynju/AVLTrees.jl)
 
 AVL self-balancing tree written in pure Julia.
 
@@ -27,4 +27,4 @@ An overview of performance is shown below. Times are shown for an average of 100
 ### Plot
 
 
-![benchmark results](https://github.com/krynju/AVLTree.jl/blob/master/benchmark/result.svg)
+![benchmark results](https://github.com/krynju/AVLTrees.jl/blob/master/benchmark/result.svg)
