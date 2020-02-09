@@ -1,6 +1,6 @@
 using AVLTrees
 using Test
 
-@testset "AVLTree.jl" begin
+@testset "AVLTrees.jl" begin
     include("basic_operations.jl")
 end
