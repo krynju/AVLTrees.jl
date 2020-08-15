@@ -4,9 +4,9 @@
     let
         t = AVLTree{Int64,Int64}()
         insert!(t, 1, 2)
-        @test t.root != nothing
+        @test !isnothing(t.root)
         @test t.root.bf == 0
-        @test t.root.right == nothing && t.root.left == nothing
+        @test isnothing(t.root.right) && isnothing(t.root.left)
         @test t.root.key == 1 && t.root.data == 2
         @test size(t) == 1
         insert!(t, 1, 10)
@@ -88,16 +88,16 @@
         insert!(t, 3, 2)
         @test size(t) == 3
         delete!(t, t.root.left)
-        @test t.root.left == nothing
+        @test isnothing(t.root.left)
         @test t.root.bf == 1
         @test size(t) == 2
         delete!(t, t.root.right)
-        @test t.root.right == nothing
+        @test isnothing(t.root.right)
         @test t.root.bf == 0
         @test size(t) == 1
         delete!(t, t.root)
         @test size(t) == 0
-        @test t.root == nothing
+        @test isnothing(t.root)
     end
 
     # fill and delete all test
@@ -107,10 +107,10 @@
             insert!(t, i, 0)
         end
         @test size(t) <= 100
-        while t.root != nothing
+        while !isnothing(t.root)
             delete!(t, t.root)
         end
-        @test t.root == nothing
+        @test isnothing(t.root)
         @test size(t) == 0
     end
 
@@ -126,7 +126,7 @@
             delete!(t, i)
         end
         @test size(t) == 0
-        @test t.root == nothing
+        @test isnothing(t.root)
     end
 
     # findkey test
