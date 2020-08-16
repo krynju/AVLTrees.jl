@@ -11,6 +11,10 @@ end
 AVLTree() = AVLTree{Any,Any}(nothing)
 AVLTree{K,D}() where {K,D} = AVLTree{K,D}(nothing)
 
+
+Base.eltype(::Type{AVLTree{K,D}}) where {K,D} = Tuple{K,D}
+Base.length(tree::AVLTree) = size(tree)
+
 Base.show(io::IO, ::MIME"text/plain", tree::AVLTree{K,D}) where {K,D} =
     print(io, "AVLTree{$(K),$(D)} with $(size(tree)) entries")
 
@@ -76,10 +80,7 @@ end # function
 
 documentation
 """
-function rebalance(tree::AVLTree{K,D}, node::Node{K,D})::Tuple{
-    Node{K,D},
-    Bool,
-} where {K,D}
+function rebalance(tree::AVLTree{K,D}, node::Node{K,D})::Tuple{Node{K,D},Bool,} where {K,D}
     if node.bf == 2
         height_changed = node.right.bf != 0
         if node.right.bf == -1
@@ -227,8 +228,8 @@ end # function
 
 
 #    __parent_replace(tree::AVLTree{K,D}, node::Node{K,D}, replacement::Node{K,D})
-#
-#Replaces node with its only child. Used on nodes with a single child when erasing a node.
+# 
+# Replaces node with its only child. Used on nodes with a single child when erasing a node.
 @inline function __parent_replace(
     tree::AVLTree{K,D},
     node::Node{K,D},
@@ -252,7 +253,7 @@ end # function
 
 
 #    __parent_replace(tree::AVLTree{K,D}, node::Node{K,D}, replacement::Nothing)
-#Replaces node with nothing. Used on leaf nodes when erasing a node.
+# Replaces node with nothing. Used on leaf nodes when erasing a node.
 @inline function __parent_replace(
     tree::AVLTree{K,D},
     node::Node{K,D},
@@ -360,6 +361,3 @@ function iterate(tree::AVLTree, node::Node)
 
     return (node.key, node.data), node
 end # function
-
-Base.eltype(::Type{AVLTree{K,D}}) where {K,D} = Tuple{K,D}
-Base.length(tree::AVLTree) = size(tree)

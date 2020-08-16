@@ -1,5 +1,5 @@
 
-@testset "basic operations" begin
+@testset "tree.jl" begin
     # root insertion test
     let
         t = AVLTree{Int64,Int64}()

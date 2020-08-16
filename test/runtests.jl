@@ -2,5 +2,6 @@ using AVLTrees
 using Test
 
 @testset "AVLTrees.jl" begin
-    include("basic_operations.jl")
+    include("tree.jl")
+    include("set.jl")
 end
