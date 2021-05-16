@@ -23,7 +23,7 @@ Base.show(io::IO, ::MIME"text/plain", tree::AVLTree{K,D}) where {K,D} =
 
 documentation
 """
-function insert!(tree::AVLTree{K,D}, key, data) where {K,D}
+function Base.insert!(tree::AVLTree{K,D}, key, data) where {K,D}
     parent = nothing
     node = tree.root
 
@@ -161,7 +161,7 @@ end
 
 documentation
 """
-function delete!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
+function Base.delete!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
     if !isnothing(node.left)
         if !isnothing(node.right)
             # left != nothing && right != nothing
@@ -198,7 +198,7 @@ end # function
 
 documentation
 """
-function delete!(tree::AVLTree{K,D}, key::K) where {K,D}
+function Base.delete!(tree::AVLTree{K,D}, key::K) where {K,D}
     node = find_node(tree, key)
     if !isnothing(node)
         delete!(tree, node)
@@ -318,7 +318,7 @@ end # function
 
 documentation
 """
-function size(tree::AVLTree)
+function Base.size(tree::AVLTree)
     return __size(tree.root)
 end # function
 
@@ -330,7 +330,7 @@ end # function
 end
 
 
-function iterate(tree::AVLTree)
+function Base.iterate(tree::AVLTree)
     if isnothing(tree.root)
         return nothing
     end
@@ -341,7 +341,7 @@ function iterate(tree::AVLTree)
     return (node.key, node.data), node
 end
 
-function iterate(tree::AVLTree, node::Node)
+function Base.iterate(tree::AVLTree, node::Node)
     if !isnothing(node.right)
         node = node.right
         while !isnothing(node.left)
@@ -361,3 +361,51 @@ function iterate(tree::AVLTree, node::Node)
 
     return (node.key, node.data), node
 end # function
+
+
+Base.getkey(tr::AVLTree{K,D},k::K) where {K,D} = findkey(tr,k)
+Base.getindex(tr::AVLTree{K,D},k::K) where {K,D} = Base.getkey(tr,k) 
+Base.setindex!(tr::AVLTree{K,D},k::K,d::D) where {K,D} = AVLTrees.insert!(tr,k,d)
+Base.haskey(tr::AVLTree{K,D},k::K) where {K,D} = !(Base.getkey(tr,k) === nothing)
+Base.eltype(::AVLTree{K,D}) where {K,D} = D
+Base.length(tr::AVLTree{K,D}) where {K,D} = AVLTrees.size(tr)
+Base.isempty(tr::AVLTree{K,D}) where {K,D} = isnothing(tr.root)
+
+function Base.popfirst!(tree::AVLTree)
+    # traverse to left-most node
+    if isnothing(tree.root)
+        return
+    end
+    node = tree.root
+    while !isnothing(node.left)
+        node = node.left
+    end
+    # delete node and return data
+    node_data = node.data
+    delete!(tree,node)
+    return node_data
+end
+
+function Base.popat!(tree::AVLTree{K,D},key::K) where {K,D}
+    node = AVLTrees.find_node(tree, key)
+    if !isnothing(node)
+        node_dat = node.data
+        delete!(tree, node)
+        return node_dat
+    else
+        return
+    end
+end
+
+function Base.first_index(tree::AVLTree)
+    # traverse to left-most node
+    if isnothing(tree.root)
+        return
+    end
+    node = tree.root
+    while !isnothing(node.left)
+        node = node.left
+    end
+    # return node key
+    return key
+end
