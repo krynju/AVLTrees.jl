@@ -19,7 +19,7 @@ Base.haskey(tr::AVLTree{K,D},k::K) where {K,D} = !(Base.getkey(tr,k) === nothing
 Base.length(tr::AVLTree{K,D}) where {K,D} = AVLTrees.size(tr)
 Base.isempty(tr::AVLTree{K,D}) where {K,D} = isnothing(tr.root)
 
-function Base.length(tree::AVLTree)
+function Base.size(tree::AVLTree)
     return __size(tree.root)
 end # function
 
