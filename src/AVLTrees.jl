@@ -2,7 +2,7 @@ module AVLTrees
 
 using Base: iterate, haskey, getkey, getindex, setindex!, length, 
             eltype, isempty, insert!, popfirst!, insert!, delete!
-            first_index, size
+            first_index, print, show
 
 include("node.jl")
 include("tree.jl")
