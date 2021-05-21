@@ -11,19 +11,32 @@ end
 AVLTree() = AVLTree{Any,Any}(nothing)
 AVLTree{K,D}() where {K,D} = AVLTree{K,D}(nothing)
 
-
 Base.eltype(::Type{AVLTree{K,D}}) where {K,D} = Tuple{K,D}
-Base.length(tree::AVLTree) = size(tree)
+Base.getkey(tr::AVLTree{K,D},k::K) where {K,D} = findkey(tr,k)
+Base.getindex(tr::AVLTree{K,D},k::K) where {K,D} = Base.getkey(tr,k) 
+Base.setindex!(tr::AVLTree{K,D},k::K,d::D) where {K,D} = AVLTrees.insert!(tr,k,d)
+Base.haskey(tr::AVLTree{K,D},k::K) where {K,D} = !(Base.getkey(tr,k) === nothing)
+Base.length(tr::AVLTree{K,D}) where {K,D} = AVLTrees.size(tr)
+Base.isempty(tr::AVLTree{K,D}) where {K,D} = isnothing(tr.root)
 
-Base.show(io::IO, ::MIME"text/plain", tree::AVLTree{K,D}) where {K,D} =
-    print(io, "AVLTree{$(K),$(D)} with $(size(tree)) entries")
+function Base.length(tree::AVLTree)
+    return __size(tree.root)
+end # function
+
+@inline function __size(node::Union{Nothing,Node})
+    if isnothing(node)
+        return 0
+    end
+    return __size(node.left) + __size(node.right) + 1
+end
+
 
 """
     insert!(args)
 
 documentation
 """
-function insert!(tree::AVLTree{K,D}, key, data) where {K,D}
+function Base.insert!(tree::AVLTree{K,D}, key, data) where {K,D}
     parent = nothing
     node = tree.root
 
@@ -156,12 +169,13 @@ end
     return y
 end
 
+
 """
     delete!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
 
 documentation
 """
-function delete!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
+function Base.delete!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
     if !isnothing(node.left)
         if !isnothing(node.right)
             # left != nothing && right != nothing
@@ -195,20 +209,17 @@ end # function
 
 """
     delete!(tree::AVLTree{K,D}, key::K) where {K,D}
-
-documentation
 """
-function delete!(tree::AVLTree{K,D}, key::K) where {K,D}
+function Base.delete!(tree::AVLTree{K,D}, key::K) where {K,D}
     node = find_node(tree, key)
     if !isnothing(node)
         delete!(tree, node)
     end
 end # function
 
+
 """
     balance_deletion(args)
-
-documentation
 """
 function balance_deletion(
     tree::AVLTree{K,D},
@@ -276,8 +287,6 @@ end # function
 
 """
     find(tree::AVLTree{K,D}, key::K) where {K,D}
-
-documentation
 """
 function findkey(tree::AVLTree{K,D}, key::K) where {K,D}
     node = tree.root
@@ -296,8 +305,6 @@ end # function
 
 """
     find_node(args)
-
-documentation
 """
 function find_node(tree::AVLTree{K,D}, key::K) where {K,D}
     node = tree.root
@@ -313,24 +320,10 @@ function find_node(tree::AVLTree{K,D}, key::K) where {K,D}
     return nothing
 end # function
 
-"""
-    size(tree::AVLTree{K,D}) where {K,D}
 
-documentation
-"""
-function size(tree::AVLTree)
-    return __size(tree.root)
-end # function
+# Iteration interface
 
-@inline function __size(node::Union{Nothing,Node})
-    if isnothing(node)
-        return 0
-    end
-    return __size(node.left) + __size(node.right) + 1
-end
-
-
-function iterate(tree::AVLTree)
+function Base.iterate(tree::AVLTree)
     if isnothing(tree.root)
         return nothing
     end
@@ -341,7 +334,7 @@ function iterate(tree::AVLTree)
     return (node.key, node.data), node
 end
 
-function iterate(tree::AVLTree, node::Node)
+function Base.iterate(tree::AVLTree, node::Node)
     if !isnothing(node.right)
         node = node.right
         while !isnothing(node.left)
@@ -360,4 +353,75 @@ function iterate(tree::AVLTree, node::Node)
     end
 
     return (node.key, node.data), node
-end # function
+end
+
+# Pop and get methods
+
+function Base.popfirst!(tree::AVLTree)
+    # traverse to left-most node
+    if isnothing(tree.root)
+        return
+    end
+    node = tree.root
+    while !isnothing(node.left)
+        node = node.left
+    end
+    # delete node and return data
+    node_data = node.data
+    delete!(tree,node)
+    return node_data
+end
+
+function Base.pop!(tree::AVLTree{K,D},key::K) where {K,D}
+    node = AVLTrees.find_node(tree, key)
+    if !isnothing(node)
+        node_dat = node.data
+        delete!(tree, node)
+        return node_dat
+    else
+        return
+    end
+end
+
+function Base.first_index(tree::AVLTree)
+    # traverse to left-most node
+    if isnothing(tree.root)
+        return
+    end
+    node = tree.root
+    while !isnothing(node.left)
+        node = node.left
+    end
+    # return node key
+    return key
+end
+
+
+
+## Print and Show methods
+
+function Base.print(io::IO,tree::AVLTree)
+    str_lst = Vector{String}()
+    for (k,v) in Base.Iterators.take(iterate(tree),10)
+        push!(str_lst,"$k => $v")
+    end
+    print(io,"AVLTree(")
+    print(io,join(str_lst,", "))
+    length(str_lst) == 10 && print(io,", ⋯ ")
+    print(io,")")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", tree::AVLTree{K,D}) where {K,D}
+    str_lst = Vector{String}()
+    for (k,v) in Base.Iterators.take(tree,10)
+        push!(str_lst,"  $k => $v")
+    end
+    if length(str_lst)>0
+        print(io,"AVLTree{$K,$D} with $(length(str_lst)) entries:\n")
+        print(io,join(str_lst,"\n"))
+    else
+        print(io,"AVLTree{$K,$D}()")
+    end
+    length(str_list) == 10 && print(io,"⋮\n")
+end
+
