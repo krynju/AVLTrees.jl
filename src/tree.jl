@@ -70,7 +70,29 @@ function Base.insert!(tree::AVLTree{K,D}, key, data) where {K,D}
     return
 end # function
 
+"""
+macro rebalance(tree, node)
 
+documentation
+"""
+macro rebalance(tree, node, height_changed)
+    return :(
+    if $(esc(node)).bf == 2
+        $(esc(height_changed)) = $(esc(node)).right.bf != 0
+        if $(esc(node)).right.bf == -1
+            rotate_right($(esc(tree)), $(esc(node)).right)
+        end
+        $(esc(node)) = rotate_left($(esc(tree)), $(esc(node)))
+    elseif $(esc(node)).bf == -2
+        $(esc(height_changed)) = $(esc(node)).left.bf != 0
+        if $(esc(node)).left.bf == 1
+            rotate_left($(esc(tree)), $(esc(node)).left)
+        end
+        $(esc(node)) = rotate_right($(esc(tree)), $(esc(node)))
+    else
+        $(esc(height_changed)) = $(esc(node)).bf == 0
+    end)
+end 
 
 """
     balance_insertion(tree::AVLTree{K,D},node::Node{K,D},left_insertion::Bool) where {K,D}
@@ -84,7 +106,8 @@ function balance_insertion(
 ) where {K,D}
     while !isnothing(node)
         node.bf += ifelse(left_insertion, -1, 1)
-        node, height_changed = rebalance(tree, node)
+        height_changed = false
+        @rebalance(tree, node, height_changed)
         if height_changed
             break
         end
@@ -93,30 +116,6 @@ function balance_insertion(
     end
 end # function
 
-"""
-    rebalance(node::Node)
-
-documentation
-"""
-function rebalance(tree::AVLTree{K,D}, node::Node{K,D})::Tuple{Node{K,D},Bool,} where {K,D}
-    if node.bf == 2
-        height_changed = node.right.bf != 0
-        if node.right.bf == -1
-            rotate_right(tree, node.right)
-        end
-        node = rotate_left(tree, node)
-        return node, height_changed
-    elseif node.bf == -2
-        height_changed = node.left.bf != 0
-        if node.left.bf == 1
-            rotate_left(tree, node.left)
-        end
-        node = rotate_right(tree, node)
-        return node, height_changed
-    else
-        return node, node.bf == 0
-    end
-end # function
 
 @inline function rotate_left(t::AVLTree{K,D}, x::Node{K,D}) where {K,D}
     y = x.right
@@ -233,7 +232,8 @@ function balance_deletion(
 ) where {K,D}
     while !isnothing(node)
         node.bf += ifelse(left_delete, 1, -1)
-        node, height_changed = rebalance(tree, node)
+        height_changed = false
+        @rebalance(tree, node, height_changed)
         if !height_changed
             break
         end
