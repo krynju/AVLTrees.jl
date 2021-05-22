@@ -1,7 +1,7 @@
 using AVLTrees, BenchmarkTools
 using Random
 using Plots
-
+using DataFrames
 
 
 function batch_insert!(t::AVLTree{K,D}, v::Vector{K}) where {K,D}
@@ -26,8 +26,12 @@ insertion_vec = []
 deletion_vec = []
 search_vec = []
 
-x = [1000, 10000, 100000, 1000000, 10000000]
 
+d = DataFrame((op=[], time=[], n=[]))
+x = [1000, 10000, 100000, 1000000]
+
+
+for attempt in 1:20
 for N in x
     global t = AVLTree{Int64,Int64}()
     rng = MersenneTwister(1111)
@@ -44,8 +48,8 @@ for N in x
         insert!(t, i, i)
     end
 
-    search = @benchmark batch_find(t, nums[1:1000])
-    insertion = @benchmark batch_insert!(t, unique_nums)
+    search = @benchmark batch_find(t, nums[1:1000]) samples=1 evals=1
+    insertion = @benchmark batch_insert!(t, unique_nums) samples=1 evals=1
 
     t = AVLTree{Int64,Int64}()
     rng = MersenneTwister(1111)
@@ -62,18 +66,18 @@ for N in x
         insert!(t, i, i)
     end
 
-    deletion = @benchmark batch_delete!(t, nums[1:1000])
+    deletion = @benchmark batch_delete!(t, nums[1:1000]) samples=1 evals=1
 
-    push!(insertion_vec, minimum(insertion).time)
-    push!(deletion_vec, minimum(deletion).time)
-    push!(search_vec, minimum(search).time)
+    push!(d, ("insert", minimum(insertion).time, N))
+    push!(d, ("delete", minimum(deletion).time,N))
+    push!(d, ("search", minimum(search).time,N))
     println("done $N")
 end
+end
 
-println("insert_times : $insertion_vec")
-println("deletion_times : $deletion_vec")
-println("search_times : $search_vec")
 
+
+c= combine(groupby(d, [:op,:n]), :time => minimum)
 
 # plot(x, insertion_vec/1000, xscale=:log10, ylabel="us")
 # plot(x, deletion_vec/1000, xscale=:log10, ylabel="us")
@@ -82,7 +86,7 @@ println("search_times : $search_vec")
 
 plot(
     x,
-    [insertion_vec / 1000, deletion_vec / 1000, search_vec / 1000],
+    [c[(c.op.=="insert"),:].time_minimum./1000,c[(c.op.=="delete"),:].time_minimum./1000, c[(c.op.=="search"),:].time_minimum./1000],
     xscale = :log10,
     ylabel = "operation time [us]",
     xlabel = "N",
@@ -91,4 +95,4 @@ plot(
     legend=:topleft,
 )
 
-savefig("result.svg")
+#savefig("result.svg")
