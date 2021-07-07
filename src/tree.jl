@@ -400,12 +400,12 @@ end
 
 ## Print and Show methods
 
-function Base.print(io::IO,tree::AVLTree)
+function Base.print(io::IO,tree::AVLTree{K,D}) where {K,D}
     str_lst = Vector{String}()
-    for (k,v) in Base.Iterators.take(iterate(tree),10)
+    for (k,v) in Base.Iterators.take(tree,10)
         push!(str_lst,"$k => $v")
     end
-    print(io,"AVLTree(")
+    print(io,"AVLTree{$K,$D}(")
     print(io,join(str_lst,", "))
     length(str_lst) == 10 && print(io,", ⋯ ")
     print(io,")")
@@ -413,8 +413,9 @@ end
 
 function Base.show(io::IO, ::MIME"text/plain", tree::AVLTree{K,D}) where {K,D}
     str_lst = Vector{String}()
+    indent_str = "  "
     for (k,v) in Base.Iterators.take(tree,10)
-        push!(str_lst,"  $k => $v")
+        push!(str_lst,indent_str*"$k => $v")
     end
     if length(str_lst)>0
         print(io,"AVLTree{$K,$D} with $(length(str_lst)) entries:\n")
@@ -422,6 +423,6 @@ function Base.show(io::IO, ::MIME"text/plain", tree::AVLTree{K,D}) where {K,D}
     else
         print(io,"AVLTree{$K,$D}()")
     end
-    length(str_list) == 10 && print(io,"⋮\n")
+    length(str_lst) == 10 && print(io,"\n",indent_str*"⋮ => ⋮ \n")
 end
 
