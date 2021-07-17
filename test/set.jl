@@ -16,4 +16,12 @@
         @test isempty(s)
     end
 
+    #constructor with AbstractVector input
+    let  
+        items = rand(1_000)
+        s = AVLSet(items)
+        @test eltype(items) == eltype(s)
+        @test all(items .∈ Ref(s))
+        @test all(items .∈ Ref(collect(s)))   
+    end
 end

@@ -5,9 +5,16 @@ end
 AVLSet() = AVLSet{Any}(AVLTree{Any,Nothing}())
 AVLSet{K}() where {K} = AVLSet{K}(AVLTree{K,Nothing}())
 
+function AVLSet(x::K) where {K <: AbstractVector}
+    t = AVLTree{eltype(x),Nothing}()
+    for i in x
+        insert!(t, i, nothing)
+    end
+    return AVLSet{eltype(x)}(t)
+end
+
 Base.eltype(::Type{AVLSet{K}}) where {K} = K
 Base.length(set::AVLSet) = length(set.tree) 
-
 
 function iterate(set::AVLSet{K}) where {K}
     ret = iterate(set.tree)
