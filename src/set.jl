@@ -15,6 +15,7 @@ end
 
 Base.eltype(::Type{AVLSet{K}}) where {K} = K
 Base.length(set::AVLSet) = length(set.tree) 
+Base.in(x::K, set::AVLSet{K}) where {K} = !isnothing(find_node(set.tree, x)) 
 
 function iterate(set::AVLSet{K}) where {K}
     ret = iterate(set.tree)
