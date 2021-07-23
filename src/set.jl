@@ -1,3 +1,5 @@
+import Base: union, union!
+
 struct AVLSet{K} <: AbstractSet{K}
     tree::AVLTree{K,Nothing}
 end
@@ -30,3 +32,10 @@ end
 Base.push!(set::AVLSet{K}, item::K) where {K} = insert!(set.tree, item, nothing)
 
 Base.delete!(set::AVLSet{K}, item) where {K} = delete!(set.tree, item)
+
+Base.union(set::AVLSet{K}, sets...) where {K} = union!(deepcopy(set), sets...)
+
+function Base.union!(set::AVLSet{K}, sets...) where {K} 
+    (s -> push!.(Ref(set), s)).(sets)
+    return set
+end
