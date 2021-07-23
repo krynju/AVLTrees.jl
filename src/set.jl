@@ -29,4 +29,4 @@ end
 
 Base.push!(set::AVLSet{K}, item::K) where {K} = insert!(set.tree, item, nothing)
 
-function delete!(set::AVLSet{K}, item) where {K} delete!(set.tree, item) end
+Base.delete!(set::AVLSet{K}, item) where {K} = delete!(set.tree, item)
