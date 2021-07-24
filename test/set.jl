@@ -25,8 +25,8 @@
     end
 
     @testset "union" begin
-        a = rand(Int64, 1000)
-        b = rand(Int64, 1000)
+        a = rand(1:1000, 800)
+        b = rand(1:1000, 800)
 
         avl_a = AVLSet(a)
         avl_b = AVLSet(b)
@@ -42,4 +42,34 @@
         @test union!(avl_b, avl_a) == union(sa, sb)
     end
 
+    @testset "setdiff" begin
+        a = rand(1:1000, 800)
+        b = rand(1:1000, 800)
+
+        avl_a = AVLSet(a)
+        avl_b = AVLSet(b)
+
+        sa = Set(a)
+        sb = Set(b)
+    
+        @test setdiff(avl_a, avl_b, avl_b) == setdiff(sa, sb)
+        @test setdiff(avl_a, avl_a) == setdiff(sa, sa)
+        @test setdiff(avl_a, sb) == setdiff(sa, sb)
+    end
+
+    @testset "intersect" begin
+        a = rand(1:1000, 800)
+        b = rand(1:1000, 800)
+
+        avl_a = AVLSet(a)
+        avl_b = AVLSet(b)
+
+        sa = Set(a)
+        sb = Set(b)
+    
+
+        @test intersect(avl_a, avl_b) == intersect(sa, sb)
+        @test intersect(avl_a, avl_a) == intersect(sa, sa)
+        
+    end
 end

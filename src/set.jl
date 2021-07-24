@@ -1,4 +1,4 @@
-import Base: union, union!
+import Base: union, union!, setdiff, setdiff!, intersect!, intersect
 
 struct AVLSet{K} <: AbstractSet{K}
     tree::AVLTree{K,Nothing}
@@ -36,6 +36,26 @@ Base.delete!(set::AVLSet{K}, item) where {K} = delete!(set.tree, item)
 Base.union(set::AVLSet{K}, sets...) where {K} = union!(deepcopy(set), sets...)
 
 function Base.union!(set::AVLSet{K}, sets...) where {K} 
-    (s -> push!.(Ref(set), s)).(sets)
+    (key -> push!.(Ref(set), key)).(sets)
+    return set
+end
+
+
+Base.setdiff(set::AVLSet{K}, sets...) where {K} = setdiff!(deepcopy(set), sets...)
+
+function Base.setdiff!(set::AVLSet{K}, sets...) where {K} 
+    (key -> delete!.(Ref(set), key)).(sets)
+    return set
+end
+
+Base.intersect(set::AVLSet{K}, s::AbstractSet) where {K} = intersect!(deepcopy(set), s)
+
+function Base.intersect!(set::AVLSet{K}, s::AbstractSet) where {K}
+    _set = collect(set)
+    for key in _set
+        if key ∉ s
+            delete!(set, key)
+        end
+    end
     return set
 end
