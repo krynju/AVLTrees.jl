@@ -426,7 +426,7 @@ function Base.show(io::IO, ::MIME"text/plain", tree::AVLTree{K,D}) where {K,D}
         push!(str_lst, indent_str * "$k => $v")
     end
     if length(str_lst) > 0
-        print(io, "AVLTree{$K,$D} with $(length(str_lst)) entries:\n")
+        print(io, "AVLTree{$K,$D} with $(length(tree)) entries:\n")
         print(io, join(str_lst, "\n"))
     else
         print(io, "AVLTree{$K,$D}()")
