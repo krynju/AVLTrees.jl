@@ -70,28 +70,28 @@ function Base.insert!(tree::AVLTree{K,D}, key, data) where {K,D}
     return
 end # function
 
-"""
-macro rebalance(tree, node)
-
-documentation
-"""
-macro rebalance(tree, node, height_changed)
+macro rebalance!(_tree, _node, _height_changed)
+    tree = esc(_tree)
+    node = esc(_node)
+    height_changed = esc(_height_changed)
+    
     return :(
-    if $(esc(node)).bf == 2
-        $(esc(height_changed)) = $(esc(node)).right.bf != 0
-        if $(esc(node)).right.bf == -1
-            rotate_right($(esc(tree)), $(esc(node)).right)
+        if $(node).bf == 2
+            $(height_changed) = $(node).right.bf != 0
+            if $(node).right.bf == -1
+                rotate_right($(tree), $(node).right)
+            end
+            $(node) = rotate_left($(tree), $(node))
+        elseif $(node).bf == -2
+            $(height_changed) = $(node).left.bf != 0
+            if $(node).left.bf == 1
+                rotate_left($(tree), $(node).left)
+            end
+            $(node) = rotate_right($(tree), $(node))
+        else
+            $(height_changed) = $(node).bf == 0
         end
-        $(esc(node)) = rotate_left($(esc(tree)), $(esc(node)))
-    elseif $(esc(node)).bf == -2
-        $(esc(height_changed)) = $(esc(node)).left.bf != 0
-        if $(esc(node)).left.bf == 1
-            rotate_left($(esc(tree)), $(esc(node)).left)
-        end
-        $(esc(node)) = rotate_right($(esc(tree)), $(esc(node)))
-    else
-        $(esc(height_changed)) = $(esc(node)).bf == 0
-    end)
+    )
 end 
 
 """
@@ -107,7 +107,7 @@ function balance_insertion(
     while !isnothing(node)
         node.bf += ifelse(left_insertion, -1, 1)
         height_changed = false
-        @rebalance(tree, node, height_changed)
+        @rebalance!(tree, node, height_changed)
         if height_changed
             break
         end
@@ -233,7 +233,7 @@ function balance_deletion(
     while !isnothing(node)
         node.bf += ifelse(left_delete, 1, -1)
         height_changed = false
-        @rebalance(tree, node, height_changed)
+        @rebalance!(tree, node, height_changed)
         if !height_changed
             break
         end
