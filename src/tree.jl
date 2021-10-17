@@ -77,22 +77,30 @@ macro rebalance!(_tree, _node, _height_changed)
     
     return :(
         if $(node).bf == 2
-            $(height_changed) = $(node).right.bf != 0
-            if $(node).right.bf == -1
-                rotate_right($(tree), $(node).right, $(node).right.left)
-            end
-            $(node) = rotate_left($(tree), $(node), $(node).right)
+            $(node), $(height_changed) = _rebalance_barrier_p2($(tree), $(node), $(node).right)
         elseif $(node).bf == -2
-            $(height_changed) = $(node).left.bf != 0
-            if $(node).left.bf == 1
-                rotate_left($(tree), $(node).left, $(node).left.right)
-            end
-            $(node) = rotate_right($(tree), $(node), $(node).left)
+            $(node), $(height_changed) = _rebalance_barrier_m2($(tree), $(node), $(node).left)
         else
             $(height_changed) = $(node).bf == 0
         end
     )
-end 
+end
+
+@inline function _rebalance_barrier_p2(tree::AVLTree{K,D}, node::Node{K,D}, node_right::Node{K,D}) where {K,D}
+    height_changed = node_right.bf != 0
+    if node_right.bf == -1
+        rotate_right(tree, node_right, node_right.left)
+    end
+    rotate_left(tree, node, node.right), height_changed
+end
+
+@inline function _rebalance_barrier_m2(tree::AVLTree{K,D}, node::Node{K,D}, node_left::Node{K,D}) where {K,D}
+    height_changed = node_left.bf != 0
+    if node_left.bf == 1
+        rotate_left(tree, node_left, node_left.right)
+    end
+    rotate_right(tree, node, node.left), height_changed
+end
 
 """
     balance_insertion(tree::AVLTree{K,D},node::Node{K,D},left_insertion::Bool) where {K,D}
@@ -104,15 +112,19 @@ function balance_insertion(
     node::Node{K,D},
     left_insertion::Bool,
 ) where {K,D}
-    while node !== nothing
+    while true
         node.bf += ifelse(left_insertion, -1, 1)
         height_changed = false
         @rebalance!(tree, node, height_changed)
-        if height_changed
+
+        height_changed && break
+        node_parent = node.parent
+        if node_parent !== nothing
+            left_insertion = node_parent.left == node
+            node = node_parent
+        else
             break
         end
-        left_insertion = node.parent !== nothing && node.parent.left == node
-        node = node.parent
     end
 end # function
 
@@ -126,17 +138,19 @@ end # function
     end
     y.left = x
 
-    if x.parent === nothing
+
+    xp = x.parent
+    if xp === nothing
         t.root = y
     else
-        if x.parent.left == x
-            x.parent.left = y
+        if xp.left == x
+            xp.left = y
         else
-            x.parent.right = y
+            xp.right = y
         end
     end
 
-    y.parent = x.parent
+    y.parent = xp
     x.parent = y
 
     x.bf -= y.bf * (y.bf >= 0) + 1
@@ -154,17 +168,18 @@ end
     end
     y.right = x
 
-    if x.parent === nothing
+    xp = x.parent
+    if xp === nothing
         t.root = y
     else
-        if x.parent.left == x
-            x.parent.left = y
+        if xp.left == x
+            xp.left = y
         else
-            x.parent.right = y
+            xp.right = y
         end
     end
 
-    y.parent = x.parent
+    y.parent = xp
     x.parent = y
 
     x.bf -= y.bf * (y.bf < 0) - 1
