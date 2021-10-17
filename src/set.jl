@@ -17,16 +17,16 @@ end
 
 Base.eltype(::Type{AVLSet{K}}) where {K} = K
 Base.length(set::AVLSet) = length(set.tree) 
-Base.in(x::K, set::AVLSet{K}) where {K} = !isnothing(find_node(set.tree, x)) 
+Base.in(x::K, set::AVLSet{K}) where {K} = find_node(set.tree, x) !== nothing 
 
 function iterate(set::AVLSet{K}) where {K}
     ret = iterate(set.tree)
-    if isnothing(ret) return nothing else return (ret[1][1], ret[2])  end
+    if ret === nothing return nothing else return (ret[1][1], ret[2])  end
 end
 
 function iterate(set::AVLSet{K}, node::Node{K,Nothing}) where {K}
     ret = iterate(set.tree, node)
-    if isnothing(ret) return nothing else return (ret[1][1], ret[2])  end
+    if ret === nothing return nothing else return (ret[1][1], ret[2])  end
 end
 
 Base.push!(set::AVLSet{K}, item::K) where {K} = insert!(set.tree, item, nothing)
