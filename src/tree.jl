@@ -79,15 +79,15 @@ macro rebalance!(_tree, _node, _height_changed)
         if $(node).bf == 2
             $(height_changed) = $(node).right.bf != 0
             if $(node).right.bf == -1
-                rotate_right($(tree), $(node).right)
+                rotate_right($(tree), $(node).right, $(node).right.left)
             end
-            $(node) = rotate_left($(tree), $(node))
+            $(node) = rotate_left($(tree), $(node), $(node).right)
         elseif $(node).bf == -2
             $(height_changed) = $(node).left.bf != 0
             if $(node).left.bf == 1
-                rotate_left($(tree), $(node).left)
+                rotate_left($(tree), $(node).left, $(node).left.right)
             end
-            $(node) = rotate_right($(tree), $(node))
+            $(node) = rotate_right($(tree), $(node), $(node).left)
         else
             $(height_changed) = $(node).bf == 0
         end
@@ -117,8 +117,8 @@ function balance_insertion(
 end # function
 
 
-@inline function rotate_left(t::AVLTree{K,D}, x::Node{K,D}) where {K,D}
-    y = x.right
+@inline function rotate_left(t::AVLTree{K,D}, x::Node{K,D}, x_right::Node{K,D}) where {K,D}
+    y = x_right
 
     x.right = y.left
     if y.left !== nothing
@@ -145,8 +145,8 @@ end # function
     return y
 end
 
-@inline function rotate_right(t::AVLTree{K,D}, x::Node{K,D}) where {K,D}
-    y = x.left
+@inline function rotate_right(t::AVLTree{K,D}, x::Node{K,D}, x_left::Node{K,D}) where {K,D}
+    y = x_left
 
     x.left = y.right
     if y.right !== nothing
