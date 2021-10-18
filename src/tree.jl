@@ -81,22 +81,22 @@ macro rebalance!(_tree, _node, _height_changed)
         elseif $(node).bf == -2
             $(node), $(height_changed) = _rebalance_barrier_m2($(tree), $(node), $(node).left)
         else
-            $(height_changed) = $(node).bf == 0
+            $(height_changed) = $(node).bf == zero(Int8)
         end
     )
 end
 
 @inline function _rebalance_barrier_p2(tree::AVLTree{K,D}, node::Node{K,D}, node_right::Node{K,D}) where {K,D}
-    height_changed = node_right.bf != 0
-    if node_right.bf == -1
+    height_changed = node_right.bf != zero(Int8)
+    if node_right.bf == -one(Int8)
         rotate_right(tree, node_right, node_right.left)
     end
     rotate_left(tree, node, node.right), height_changed
 end
 
 @inline function _rebalance_barrier_m2(tree::AVLTree{K,D}, node::Node{K,D}, node_left::Node{K,D}) where {K,D}
-    height_changed = node_left.bf != 0
-    if node_left.bf == 1
+    height_changed = node_left.bf != zero(Int8)
+    if node_left.bf == one(Int8)
         rotate_left(tree, node_left, node_left.right)
     end
     rotate_right(tree, node, node.left), height_changed
@@ -113,7 +113,7 @@ function balance_insertion(
     left_insertion::Bool,
 ) where {K,D}
     while true
-        node.bf += ifelse(left_insertion, -1, 1)
+        node.bf += ifelse(left_insertion, -one(Int8), one(Int8))
         height_changed = false
         @rebalance!(tree, node, height_changed)
 
@@ -153,8 +153,8 @@ end # function
     y.parent = xp
     x.parent = y
 
-    x.bf -= y.bf * (y.bf >= 0) + 1
-    y.bf += x.bf * (x.bf < 0) - 1
+    x.bf -= y.bf * (y.bf >= zero(Int8)) + one(Int8)
+    y.bf += x.bf * (x.bf < zero(Int8)) - one(Int8)
 
     return y
 end
@@ -182,8 +182,8 @@ end
     y.parent = xp
     x.parent = y
 
-    x.bf -= y.bf * (y.bf < 0) - 1
-    y.bf += x.bf * (x.bf >= 0) + 1
+    x.bf -= y.bf * (y.bf < zero(Int8)) - one(Int8)
+    y.bf += x.bf * (x.bf >= zero(Int8)) + one(Int8)
 
     return y
 end
@@ -196,11 +196,14 @@ documentation
 """
 function Base.delete!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
     if node.left !== nothing
-        if node.right !== nothing
+        node_right = node.right
+        if node_right !== nothing
             # left != nothing && right != nothing
-            temp = node.right
-            while temp.left !== nothing
-                temp = temp.left
+            temp = node_right
+            temp_left = temp.left
+            while temp_left !== nothing
+                temp = temp_left
+                temp_left = temp.left
             end
             # switch spots completely
             node.key = temp.key
@@ -212,9 +215,10 @@ function Base.delete!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
             balance_deletion(tree, node.parent, dir)
         end
     else
-        if node.right !== nothing
+        node_right = node.right
+        if node_right !== nothing
             # left == nothing && right != nothing
-            dir = __parent_replace(tree, node, node.right)
+            dir = __parent_replace(tree, node, node_right)
             balance_deletion(tree, node.parent, dir)
         else
             # left == nothing && right == nothing
@@ -226,9 +230,6 @@ function Base.delete!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
 end # function
 
 
-"""
-    delete!(tree::AVLTree{K,D}, key::K) where {K,D}
-"""
 function Base.delete!(tree::AVLTree{K,D}, key::K) where {K,D}
     node = find_node(tree, key)
     if node !== nothing
@@ -237,23 +238,28 @@ function Base.delete!(tree::AVLTree{K,D}, key::K) where {K,D}
 end # function
 
 
-"""
-    balance_deletion(args)
-"""
+
+balance_deletion(tree::AVLTree, node::Nothing, left_delete::Bool) where {K,D} = return
+
+
 function balance_deletion(
     tree::AVLTree{K,D},
-    node::Union{Node{K,D},Nothing},
-    left_delete::Union{Nothing,Bool},
+    node::Node{K,D},
+    left_delete::Bool,
 ) where {K,D}
     while node !== nothing
-        node.bf += ifelse(left_delete, 1, -1)
+        node.bf += ifelse(left_delete, one(Int8), -one(Int8))
         height_changed = false
         @rebalance!(tree, node, height_changed)
-        if !height_changed
+
+        !height_changed && break
+        node_parent = node.parent
+        if node_parent !== nothing
+            left_delete = node_parent.left == node
+            node = node_parent
+        else
             break
         end
-        left_delete = node.parent !== nothing && node.parent.left == node
-        node = node.parent
     end
 end # function
 
@@ -266,19 +272,20 @@ end # function
     node::Node{K,D},
     replacement::Node{K,D},
 ) where {K,D}
-    if node.parent !== nothing
-        replacement.parent = node.parent
-        if node.parent.right == node
-            node.parent.right = replacement
+    node_parent = node.parent
+    if node_parent !== nothing
+        replacement.parent = node_parent
+        if node_parent.right == node
+            node_parent.right = replacement
             return false
         else
-            node.parent.left = replacement
+            node_parent.left = replacement
             return true
         end
     else
         replacement.parent = nothing
         tree.root = replacement
-        return nothing
+        return false
     end
 end # function
 
@@ -290,17 +297,18 @@ end # function
     node::Node{K,D},
     replacement::Nothing,
 ) where {K,D}
-    if node.parent !== nothing
-        if node.parent.right == node
-            node.parent.right = replacement
+    node_parent = node.parent
+    if node_parent !== nothing
+        if node_parent.right == node
+            node_parent.right = replacement
             return false
         else
-            node.parent.left = replacement
+            node_parent.left = replacement
             return true
         end
     else
         tree.root = replacement
-        return nothing
+        return false
     end
 end # function
 
