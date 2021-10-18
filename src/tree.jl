@@ -108,7 +108,7 @@ end
 
 documentation
 """
-function balance_insertion(
+@inline function balance_insertion(
     tree::AVLTree{K,D},
     node::Node{K,D},
     left_insertion::Bool,
@@ -133,12 +133,13 @@ end # function
 @inline function rotate_left(t::AVLTree{K,D}, x::Node{K,D}, x_right::Node{K,D}) where {K,D}
     y = x_right
 
-    x.right = y.left
     if y.left !== nothing
+        x.right = y.left
         y.left.parent = x
+    else
+        x.right = nothing
     end
     y.left = x
-
 
     xp = x.parent
     if xp === nothing
@@ -163,9 +164,11 @@ end
 @inline function rotate_right(t::AVLTree{K,D}, x::Node{K,D}, x_left::Node{K,D}) where {K,D}
     y = x_left
 
-    x.left = y.right
     if y.right !== nothing
+        x.left = y.right
         y.right.parent = x
+    else
+        x.left = nothing
     end
     y.right = x
 
@@ -240,10 +243,10 @@ end # function
 
 
 
-balance_deletion(tree::AVLTree, node::Nothing, left_delete::Bool) where {K,D} = return
+@inline balance_deletion(tree::AVLTree, node::Nothing, left_delete::Bool) where {K,D} = return
 
 
-function balance_deletion(
+@inline function balance_deletion(
     tree::AVLTree{K,D},
     node::Node{K,D},
     left_delete::Bool,
