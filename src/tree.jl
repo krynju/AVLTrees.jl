@@ -12,11 +12,12 @@ AVLTree() = AVLTree{Any,Any}(nothing)
 AVLTree{K,D}() where {K,D} = AVLTree{K,D}(nothing)
 
 Base.eltype(::Type{AVLTree{K,D}}) where {K,D} = Tuple{K,D}
-Base.getindex(tr::AVLTree{K,D},k::K) where {K,D} = Base.getkey(tr, k) 
-Base.setindex!(tr::AVLTree{K,D},k::K,d::D) where {K,D} = AVLTrees.insert!(tr, k, d)
-Base.haskey(tr::AVLTree{K,D},k::K) where {K,D} = !(find_node(tr, k) === nothing)
+Base.getindex(tr::AVLTree{K,D}, k::K) where {K,D} = Base.getkey(tr, k) 
+Base.setindex!(tr::AVLTree{K,D}, k::K, d::D) where {K,D} = AVLTrees.insert!(tr, k, d)
+Base.haskey(tr::AVLTree{K,D}, k::K) where {K,D} = !(find_node(tr, k) === nothing)
 Base.length(tr::AVLTree{K,D}) where {K,D} = AVLTrees.size(tr)
 Base.isempty(tr::AVLTree{K,D}) where {K,D} = tr.root === nothing
+Base.in(x::K, tr::AVLTree{K,D}) where {K,D} = find_node(tr, x) !== nothing
 
 function Base.getkey(tr::AVLTree{K,D}, k::K) where {K,D} 
     d = findkey(tr, k)
@@ -319,7 +320,7 @@ end # function
     Warning: do not use it to check whether `key` is in the `tree`.
     It returns the node.data if found which can be `nothing`.
 """
-function findkey(tree::AVLTree{K,D}, key::K) where {K,D}
+@inline function findkey(tree::AVLTree{K,D}, key::K) where {K,D}
     node = tree.root
     while node !== nothing
         if key < node.key
@@ -337,7 +338,7 @@ end # function
 """
     find_node(args)
 """
-function find_node(tree::AVLTree{K,D}, key::K) where {K,D}
+@inline function find_node(tree::AVLTree{K,D}, key::K) where {K,D}
     node = tree.root
     while node !== nothing
         if key < node.key
