@@ -28,7 +28,7 @@ search_vec = []
 
 
 d = DataFrame((op=[], time=[], n=[]))
-x = [1_000, 10_000, 100_000]
+x = [1_000, 10_000, 100_000, 1_000_000, 10_000_000]
 
 function prepare_t(t)
     _t = deepcopy(t)
@@ -49,9 +49,9 @@ for attempt in 1:1
             insert!(t, i, i)
         end
 
-        insertion = @benchmark batch_insert!(_t, nums_test) setup=(_t =deepcopy(t)) samples=1 evals=1
-        search = @benchmark batch_find(t, nums_test) setup=(_t = prepare_t(t)) samples=1 evals=1
-        deletion = @benchmark batch_delete!(t, nums_test) setup=(_t = prepare_t(t)) samples=1 evals=1
+        insertion = @benchmark batch_insert!(_t, nums_test) setup=(_t =deepcopy(t))
+        search = @benchmark batch_find(t, nums_test) setup=(_t = prepare_t(t))
+        deletion = @benchmark batch_delete!(t, nums_test) setup=(_t = prepare_t(t))
 
         push!(d, ("insert", minimum(insertion).time, N))
         push!(d, ("delete", minimum(deletion).time,N))
@@ -71,16 +71,17 @@ c = combine(groupby(d, [:op,:n]), :time => minimum)
 
 plot(
     x,
-    [c[(c.op.=="insert"),:].time_minimum./10000,c[(c.op.=="delete"),:].time_minimum./10000, c[(c.op.=="search"),:].time_minimum./10000],
+    [c[(c.op.=="insert"),:].time_minimum,c[(c.op.=="delete"),:].time_minimum, c[(c.op.=="search"),:].time_minimum],
     xscale = :log10,
     ylabel = "operation time [us]",
     xlabel = "N",
+    xticks = [1e3, 1e4, 1e5, 1e6, 1e7],
     markershape =[:diamond :utriangle :dtriangle],
     labels= ["insert" "delete" "lookup"],
     legend=:topleft,
 )
 
-savefig("result_master.svg")
-savefig("result_master.png")
+savefig("branch_results_new2.svg")
+savefig("result_new2.png")
 using CSV
-CSV.write("branch_results_master.csv", c)
+CSV.write("branch_results_new2.csv", c)
