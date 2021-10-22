@@ -26,12 +26,16 @@ d = DataFrame((op=[], time=[], n=[]))
 x = [1_000, 10_000, 100_000, 1_000_000, 10_000_000]
 
 function prepare_t_insert(t)
-    batch_delete!(t, nums_test)
+    for i in nums_test
+        delete!(t, i)
+    end
     t
 end
 
 function prepare_t_delete(t)
-    batch_insert!(t, nums_test)
+    for i in nums_test
+        insert!(t, i, i)
+    end
     t
 end
 
@@ -47,8 +51,8 @@ for attempt in 1:5
             insert!(t, i, i)
         end
 
-        insertion = @benchmark batch_insert!(_t, nums_test) setup=(_t=prepare_t_insert(t))
-        deletion = @benchmark batch_delete!(_t, nums_test) setup=(_t=prepare_t_delete(t))
+        insertion = @benchmark batch_insert!(_t, nums_test) evals=1 setup=(_t=prepare_t_insert(t))
+        deletion = @benchmark batch_delete!(_t, nums_test) evals=1 setup=(_t=prepare_t_delete(t))
 
         batch_insert!(t, nums_test)
         search = @benchmark batch_find(t, nums_test)
