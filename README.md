@@ -12,22 +12,24 @@ keeping the balance factor. All balancing procedures are dynamically propagated
 
 ## Benchmark
 
-An overview of performance is shown below. Times are shown for an average of 1000 operations made at N elements in the structure.
+An overview of performance is shown below (Julia 1.6.3). Times in nanoseconds. Average of 100 operations performed at tree size `n` using `Int64` keys and data.
 
 ### Table
 
 ```julia
- Row │ n         insert[us]   delete[us]    search[us]
-     │ Any       Float64?     Float64?      Float64?  
-─────┼────────────────────────────────────────────────
-   1 │ 1000          152.67        32.02    0.00222892
-   2 │ 10000         174.1         63.86    0.00227912
-   3 │ 100000        299.6        165.86    0.00235597
-   4 │ 1000000       629.11       524.92    0.00304124
-   5 │ 10000000      964.76       912.39    0.025
+ Row │ n         insert    delete    search   
+     │ Any       Float64?  Float64?  Float64? 
+─────┼────────────────────────────────────────
+   1 │ 1000       12.5      6.70253  0.164164
+   2 │ 10000      24.8889  12.4      0.18018
+   3 │ 100000     45.1429  22.0      0.192385
+   4 │ 1000000    65.8     32.2222   0.225677
+   5 │ 10000000  104.0     49.4286   0.235944
 ```
 
 ### Plot
 
 
 ![benchmark results](https://github.com/krynju/AVLTrees.jl/blob/master/benchmark/result.svg)
+
+![benchmark results](https://github.com/krynju/AVLTrees.jl/blob/master/benchmark/result_log.svg)
