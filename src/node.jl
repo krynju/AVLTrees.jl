@@ -1,9 +1,3 @@
-
-"""
-    Node
-
-struct
-"""
 mutable struct Node{K,D}
     parent::Union{Node{K,D},Nothing}
     left::Union{Node{K,D},Nothing}
@@ -11,7 +5,7 @@ mutable struct Node{K,D}
     key::K
     bf::Int8
     data::D
-end # Node
+end
 
 Node{K,D}(key, data, parent) where {K,D} =
     Node{K,D}(parent, nothing, nothing, key, Int8(0), data)
