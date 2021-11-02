@@ -17,16 +17,9 @@ function AVLDict(x::V) where {V <: AbstractVector}
     return AVLDict{keytype,datatype}(t)
 end
 
-Base.haskey(dict::AVLDict{K,D}, key::K) where {K,D} = find_node(dict.tree, key) !== nothing
+Base.haskey(dict::AVLDict{K,D}, k::K) where {K,D} = haskey(dict.tree, k)
 
-# TODO: probably move the logic to tree?
-function Base.get(dict::AVLDict{K,D}, key::K, default) where {K,D} 
-    node = find_node(dict.tree, key)
-    node === nothing ? default : node.data
-end
-
-function Base.get!(dict::AVLDict{K,D}, key::K, default) where {K,D} 
-    node = find_node(dict.tree, key)
-    node === nothing && insert!(dict.tree, key, default)
-    return default
-end
+Base.get(dict::AVLDict{K,D}, k::K, default) where {K,D} = get(dict.tree, k, default)
+Base.get(f::Function, dict::AVLDict{K,D}, k::K) where {K,D} = get(f, dict.tree, k)
+Base.get!(dict::AVLDict{K,D}, k::K, default) where {K,D} = get!(dict.tree, k, default)
+Base.get!(f::Function, dict::AVLDict{K,D}, k::K) where {K,D} = get!(f, dict.tree, k)

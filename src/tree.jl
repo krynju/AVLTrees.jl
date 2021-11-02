@@ -5,60 +5,6 @@ end
 AVLTree() = AVLTree{Any,Any}(nothing)
 AVLTree{K,D}() where {K,D} = AVLTree{K,D}(nothing)
 
-Base.eltype(::Type{AVLTree{K,D}}) where {K,D} = Tuple{K,D}
-Base.getindex(tr::AVLTree{K,D}, k::K) where {K,D} = Base.getkey(tr, k) 
-Base.setindex!(tr::AVLTree{K,D}, k::K, d::D) where {K,D} = AVLTrees.insert!(tr, k, d)
-Base.haskey(tr::AVLTree{K,D}, k::K) where {K,D} = !(find_node(tr, k) === nothing)
-Base.length(tr::AVLTree{K,D}) where {K,D} = AVLTrees.size(tr)
-Base.isempty(tr::AVLTree{K,D}) where {K,D} = tr.root === nothing
-Base.in(x::K, tr::AVLTree{K,D}) where {K,D} = find_node(tr, x) !== nothing
-
-# TODO: this is not aligned with the Base def
-function Base.getkey(tr::AVLTree{K,D}, k::K) where {K,D} 
-    d = findkey(tr, k)
-    if d === nothing throw(KeyError(k)) else d end
-end
-
-
-Base.size(tree::AVLTree) = __size(tree.root)
-
-
-@inline function __size(node::Union{Nothing,Node})
-    if node === nothing
-        return 0
-    end
-    return __size(node.left) + __size(node.right) + 1
-end
-
-
-function Base.insert!(tree::AVLTree{K,D}, key, data) where {K,D}
-    parent = nothing
-    node = tree.root
-
-    while node !== nothing
-        parent = node
-        if key < node.key
-            node = node.left
-        elseif key > node.key
-            node = node.right
-        else
-            node.data = data
-            return
-        end
-    end
-
-    if parent === nothing
-        tree.root = Node{K,D}(key, data)
-    elseif key < parent.key
-        parent.left = Node{K,D}(key, data, parent)
-        balance_insertion(tree, parent, true)
-    elseif key > parent.key
-        parent.right = Node{K,D}(key, data, parent)
-        balance_insertion(tree, parent, false)
-    end
-
-    return
-end
 
 # TODO: Verify whether the macro is still necessary
 macro rebalance!(_tree, _node, _height_changed)
@@ -96,6 +42,36 @@ end
 end
 
 
+function Base.insert!(tree::AVLTree{K,D}, key::K, data::D) where {K,D}
+    parent = nothing
+    node = tree.root
+
+    while node !== nothing
+        parent = node
+        if key < node.key
+            node = node.left
+        elseif key > node.key
+            node = node.right
+        else
+            node.data = data
+            return
+        end
+    end
+
+    if parent === nothing
+        tree.root = Node{K,D}(key, data)
+    elseif key < parent.key
+        parent.left = Node{K,D}(key, data, parent)
+        balance_insertion(tree, parent, true)
+    elseif key > parent.key
+        parent.right = Node{K,D}(key, data, parent)
+        balance_insertion(tree, parent, false)
+    end
+
+    return tree
+end
+
+
 @inline function balance_insertion(
     tree::AVLTree{K,D},
     node::Node{K,D},
@@ -110,6 +86,76 @@ end
         node_parent = node.parent
         if node_parent !== nothing
             left_insertion = node_parent.left == node
+            node = node_parent
+        else
+            break
+        end
+    end
+end
+
+
+function Base.delete!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
+    if node.left !== nothing
+        node_right = node.right
+        if node_right !== nothing
+            # left != nothing && right != nothing
+            temp = node_right
+            temp_left = temp.left
+            while temp_left !== nothing
+                temp = temp_left
+                temp_left = temp.left
+            end
+            # switch spots completely
+            node.key = temp.key
+            node.data = temp.data
+            delete!(tree, temp)
+        else
+            # left != nothing && right == nothing
+            dir = __parent_replace(tree, node, node.left)
+            balance_deletion(tree, node.parent, dir)
+        end
+    else
+        node_right = node.right
+        if node_right !== nothing
+            # left == nothing && right != nothing
+            dir = __parent_replace(tree, node, node_right)
+            balance_deletion(tree, node.parent, dir)
+        else
+            # left == nothing && right == nothing
+            dir = __parent_replace(tree, node, nothing)
+            balance_deletion(tree, node.parent, dir)
+        end
+    end
+    return tree
+end
+
+
+function Base.delete!(tree::AVLTree{K,D}, key::K) where {K,D}
+    node = find_node(tree, key)
+    if node !== nothing
+        delete!(tree, node)
+    end
+    return tree
+end
+
+
+@inline balance_deletion(tree::AVLTree, node::Nothing, left_delete::Bool) where {K,D} = return nothing
+
+
+@inline function balance_deletion(
+    tree::AVLTree{K,D},
+    node::Node{K,D},
+    left_delete::Bool,
+) where {K,D}
+    while node !== nothing
+        node.bf += ifelse(left_delete, one(Int8), -one(Int8))
+        height_changed = false
+        @rebalance!(tree, node, height_changed)
+
+        !height_changed && break
+        node_parent = node.parent
+        if node_parent !== nothing
+            left_delete = node_parent.left == node
             node = node_parent
         else
             break
@@ -149,6 +195,7 @@ end
     return y
 end
 
+
 @inline function rotate_right(t::AVLTree{K,D}, x::Node{K,D}, x_left::Node{K,D}) where {K,D}
     y = x_left
 
@@ -181,75 +228,6 @@ end
 end
 
 
-function Base.delete!(tree::AVLTree{K,D}, node::Node{K,D}) where {K,D}
-    if node.left !== nothing
-        node_right = node.right
-        if node_right !== nothing
-            # left != nothing && right != nothing
-            temp = node_right
-            temp_left = temp.left
-            while temp_left !== nothing
-                temp = temp_left
-                temp_left = temp.left
-            end
-            # switch spots completely
-            node.key = temp.key
-            node.data = temp.data
-            delete!(tree, temp)
-        else
-            # left != nothing && right == nothing
-            dir = __parent_replace(tree, node, node.left)
-            balance_deletion(tree, node.parent, dir)
-        end
-    else
-        node_right = node.right
-        if node_right !== nothing
-            # left == nothing && right != nothing
-            dir = __parent_replace(tree, node, node_right)
-            balance_deletion(tree, node.parent, dir)
-        else
-            # left == nothing && right == nothing
-            dir = __parent_replace(tree, node, nothing)
-            balance_deletion(tree, node.parent, dir)
-        end
-    end
-    return
-end
-
-
-function Base.delete!(tree::AVLTree{K,D}, key::K) where {K,D}
-    node = find_node(tree, key)
-    if node !== nothing
-        delete!(tree, node)
-    end
-end
-
-
-@inline balance_deletion(tree::AVLTree, node::Nothing, left_delete::Bool) where {K,D} = return
-
-
-@inline function balance_deletion(
-    tree::AVLTree{K,D},
-    node::Node{K,D},
-    left_delete::Bool,
-) where {K,D}
-    while node !== nothing
-        node.bf += ifelse(left_delete, one(Int8), -one(Int8))
-        height_changed = false
-        @rebalance!(tree, node, height_changed)
-
-        !height_changed && break
-        node_parent = node.parent
-        if node_parent !== nothing
-            left_delete = node_parent.left == node
-            node = node_parent
-        else
-            break
-        end
-    end
-end
-
-
 #    __parent_replace(tree::AVLTree{K,D}, node::Node{K,D}, replacement::Node{K,D})
 #
 # Replaces node with its only child. Used on nodes with a single child when erasing a node.
@@ -275,6 +253,7 @@ end
     end
 end
 
+
 #    __parent_replace(tree::AVLTree{K,D}, node::Node{K,D}, replacement::Nothing)
 #
 # Replaces node with nothing. Used on leaf nodes when erasing a node.
@@ -299,26 +278,6 @@ end
 end
 
 
-"""
-    find(tree::AVLTree{K,D}, key::K) where {K,D}
-
-Warning: do not use it to check whether `key` is in the `tree`.
-It returns the node.data if found which can be `nothing`.
-"""
-@inline function findkey(tree::AVLTree{K,D}, key::K) where {K,D}
-    node = tree.root
-    while node !== nothing
-        if key < node.key
-            node = node.left
-        elseif key > node.key
-            node = node.right
-        else
-            return node.data
-        end
-    end
-    return nothing
-end
-
 @inline function find_node(tree::AVLTree{K,D}, key::K) where {K,D}
     node = tree.root
     while node !== nothing
@@ -332,105 +291,3 @@ end
     end
     return nothing
 end
-
-
-function Base.iterate(tree::AVLTree)
-    if tree.root === nothing
-        return nothing
-    end
-    node = tree.root
-    while node.left !== nothing
-        node = node.left
-    end
-    return (node.key, node.data), node
-end
-
-function Base.iterate(tree::AVLTree, node::Node)
-    if node.right !== nothing
-        node = node.right
-        while node.left !== nothing
-            node = node.left
-        end
-    else
-        prev = node
-        while node !== nothing && node.left != prev
-            prev = node
-            node = node.parent
-        end
-    end
-
-    if node === nothing
-        return nothing
-    end
-
-    return (node.key, node.data), node
-end
-
-
-function Base.popfirst!(tree::AVLTree)
-    # traverse to left-most node
-    if tree.root === nothing
-        return
-    end
-    node = tree.root
-    while node.left !== nothing
-        node = node.left
-    end
-    # delete node and return data
-    node_data = node.data
-    delete!(tree, node)
-    return node_data
-end
-
-function Base.pop!(tree::AVLTree{K,D}, key::K) where {K,D}
-    node = AVLTrees.find_node(tree, key)
-    if node !== nothing
-        node_dat = node.data
-        delete!(tree, node)
-        return node_dat
-    else
-        return
-    end
-end
-
-function Base.firstindex(tree::AVLTree)
-    # traverse to left-most node
-    if tree.root === nothing
-        return
-    end
-    node = tree.root
-    while node.left !== nothing
-        node = node.left
-    end
-    # return node key
-    return node.key
-end
-
-
-function Base.print(io::IO, tree::AVLTree{K,D}) where {K,D}
-    str_lst = Vector{String}()
-    for (k, v) in Base.Iterators.take(tree, 10)
-        push!(str_lst, "$k => $v")
-    end
-    print(io, "AVLTree{$K,$D}(")
-    print(io, join(str_lst, ", "))
-    length(str_lst) == 10 && print(io, ", ⋯ ")
-    print(io, ")")
-end
-
-
-function Base.show(io::IO, ::MIME"text/plain", tree::AVLTree{K,D}) where {K,D}
-    str_lst = Vector{String}()
-    indent_str = "  "
-    for (k, v) in Base.Iterators.take(tree, 10)
-        push!(str_lst, indent_str * "$k => $v")
-    end
-    if length(str_lst) > 0
-        print(io, "AVLTree{$K,$D} with $(length(tree)) entries:\n")
-        print(io, join(str_lst, "\n"))
-    else
-        print(io, "AVLTree{$K,$D}()")
-    end
-    length(str_lst) == 10 && print(io, "\n", indent_str * "⋮ => ⋮ \n")
-end
-

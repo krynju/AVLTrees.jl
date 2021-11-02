@@ -120,14 +120,14 @@
         @test isnothing(t.root)
     end
 
-    @testset "findkey test" begin
+    @testset "getkey test" begin
         t = AVLTree{Int64,Int64}()
         for i = 1:1000
             insert!(t, i, i)
         end
         @test size(t) == 1000
-        @test 500 == findkey(t, 500)
-        @test nothing == findkey(t, 1001)
+        @test 500 == getkey(t, 500, nothing)
+        @test nothing == getkey(t, 1001, nothing)
         @test size(t) == 1000
     end
 
@@ -158,7 +158,7 @@
         catch x
             @test x == KeyError(-100)
         end
-        setindex!(t, 10, -10) 
+        setindex!(t, -10, 10) 
         @test t[10] == -10
         @test haskey(t,10) 
         @test !haskey(t,-10)
