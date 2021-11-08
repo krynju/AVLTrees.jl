@@ -4,8 +4,8 @@ struct AVLSet{K} <: AbstractSet{K}
     tree::AVLTree{K,Nothing}
 end
 
-AVLSet() = AVLSet{Any}(AVLTree{Any,Nothing}())
-AVLSet{K}() where {K} = AVLSet{K}(AVLTree{K,Nothing}())
+AVLSet() = AVLSet{Any}(AVLTree{Any, Nothing}())
+AVLSet{K}() where {K} = AVLSet{K}(AVLTree{K, Nothing}())
 
 function AVLSet(x::K) where {K <: AbstractVector}
     t = AVLTree{eltype(x),Nothing}()

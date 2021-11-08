@@ -80,15 +80,15 @@
         insert!(t, 2, 2)
         insert!(t, 3, 2)
         @test size(t) == 3
-        delete!(t, t.root.left)
+        AVLTrees.delete_node!(t, t.root.left)
         @test isnothing(t.root.left)
         @test t.root.bf == 1
         @test size(t) == 2
-        delete!(t, t.root.right)
+        AVLTrees.delete_node!(t, t.root.right)
         @test isnothing(t.root.right)
         @test t.root.bf == 0
         @test size(t) == 1
-        delete!(t, t.root)
+        AVLTrees.delete_node!(t, t.root)
         @test size(t) == 0
         @test isnothing(t.root)
     end
@@ -100,7 +100,7 @@
         end
         @test size(t) <= 100
         while !isnothing(t.root)
-            delete!(t, t.root)
+            AVLTrees.delete_node!(t, t.root)
         end
         @test isnothing(t.root)
         @test size(t) == 0
@@ -173,6 +173,4 @@
         @test pop!.(Ref(t), 1:100) == 1:100
 
     end
-    
-
 end
