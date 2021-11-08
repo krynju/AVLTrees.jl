@@ -170,7 +170,7 @@
         @test popfirst!(t) == -10
         @test firstindex(t) == 1
         t[10] = 10
-        @test pop!.(Ref(t), 1:100) == 1:100
+        @test getproperty.(pop!.(Ref(t), 1:100), :data) == 1:100
 
     end
 end
