@@ -35,7 +35,7 @@ Base.delete!(set::AVLSet{K}, item) where {K} = delete!(set.tree, item)
 
 Base.union(set::AVLSet{K}, sets...) where {K} = union!(deepcopy(set), sets...)
 
-function Base.union!(set::AVLSet{K}, sets...) where {K} 
+function Base.union!(set::AVLSet{K}, sets...) where {K}
     (key -> push!.(Ref(set), key)).(sets)
     return set
 end
@@ -43,7 +43,7 @@ end
 
 Base.setdiff(set::AVLSet{K}, sets...) where {K} = setdiff!(deepcopy(set), sets...)
 
-function Base.setdiff!(set::AVLSet{K}, sets...) where {K} 
+function Base.setdiff!(set::AVLSet{K}, sets...) where {K}
     (key -> delete!.(Ref(set), key)).(sets)
     return set
 end

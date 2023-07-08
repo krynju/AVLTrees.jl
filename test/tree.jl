@@ -1,6 +1,6 @@
 
 @testset "tree.jl" begin
-    
+
     @testset "root insertion test" begin
         t = AVLTree{Int64,Int64}()
         insert!(t, 1, 2)
@@ -35,7 +35,7 @@
         @test t.root.key == 2 && t.root.left.key == 1 && t.root.right.key == 3
         @test size(t) == 3
     end
- 
+
     @testset "left-right rotation test" begin
         t = AVLTree{Int64,Int64}()
         insert!(t, 3, 2)
@@ -127,7 +127,7 @@
         end
         @test size(t) == 1000
         @test 500 == getkey(t, 500, nothing)
-        @test nothing == getkey(t, 1001, nothing)
+        @test nothing === getkey(t, 1001, nothing)
         @test size(t) == 1000
     end
 
@@ -158,9 +158,9 @@
         catch x
             @test x == KeyError(-100)
         end
-        setindex!(t, -10, 10) 
+        setindex!(t, -10, 10)
         @test t[10] == -10
-        @test haskey(t,10) 
+        @test haskey(t,10)
         @test !haskey(t,-10)
         @test length(t) == 100
         t[-10] = -10

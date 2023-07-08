@@ -1,10 +1,12 @@
 mutable struct AVLTree{K, V}
     root::Union{Node{K, V},Nothing}
+
+    function AVLTree{K,V}() where {K,V}
+        new(nothing)
+    end
 end
 
-AVLTree() = AVLTree{Any,Any}(nothing)
-AVLTree{K, V}() where {K, V} = AVLTree{K, V}(nothing)
-
+AVLTree() = AVLTree{Any,Any}()
 
 ##############################################################
 # Core
@@ -283,6 +285,13 @@ end
 ##############################################################
 # Utilities
 ##############################################################
+@inline function find_node(tree::AVLTree{Nothing, V}, ::Nothing) where { V}
+    return tree.root
+end
+
+@inline function find_node(tree::AVLTree{Missing, V}, ::Missing) where { V}
+    return tree.root
+end
 
 @inline function find_node(tree::AVLTree{K, V}, key::K) where {K, V}
     node = tree.root

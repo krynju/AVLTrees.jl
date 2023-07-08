@@ -34,7 +34,7 @@ function Base.delete!(tree::AVLTree{K, V}, key::K) where {K, V}
     return tree
 end
 
-Base.get(t::AVLTree{K, V}, k::K, default) where {K, V} = getkey(t, k, default)
+Base.get(t::AVLTree{K, V}, k, default) where {K, V} = getkey(t, k, default)
 
 function Base.get(f::Function, t::AVLTree{K, V}, k::K) where {K, V}
     node = find_node(t, k)
@@ -75,7 +75,17 @@ function Base.getindex(t::AVLTree{K, V}, k::K) where {K, V}
     end
 end
 
-function Base.getkey(t::AVLTree{K, V}, k::K, default) where {K, V} 
+function Base.getkey(t::AVLTree{K, V}, k::T, default) where {K, V, T}
+    T !== K && return default
+    node = find_node(t, k)
+    if node === nothing
+        return default
+    else
+        return node.data
+    end
+end
+
+function Base.getkey(t::AVLTree{K, V}, k::K, default) where {K, V}
     node = find_node(t, k)
     if node === nothing
         return default
@@ -97,7 +107,7 @@ function Base.iterate(t::AVLTree)
 end
 
 
-function Base.iterate(t::AVLTree, node::Node)
+function Base.iterate(::AVLTree, node::Node)
     if node.right !== nothing
         node = node.right
         while node.left !== nothing
@@ -192,8 +202,7 @@ function Base.print(io::IO, t::AVLTree{K, V}) where {K, V}
     print(io, ")")
 end
 
-
-function Base.show(io::IO, ::MIME"text/plain", t::AVLTree{K, V}) where {K, V}
+function printtree(io::IO, t::AVLTree{K, V}) where {K, V}
     str_lst = Vector{String}()
     indent_str = "  "
     for (k, v) in Base.Iterators.take(t, 10)
@@ -206,4 +215,8 @@ function Base.show(io::IO, ::MIME"text/plain", t::AVLTree{K, V}) where {K, V}
         print(io, "AVLTree{$K,$V}()")
     end
     length(str_lst) == 10 && print(io, "\n", indent_str * "⋮ => ⋮ \n")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", t::AVLTree{K, V}) where {K, V}
+    printtree(io ,t )
 end
