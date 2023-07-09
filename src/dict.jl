@@ -94,7 +94,7 @@ function Base.pop!(dict::AVLDict{K,D}, k::K, default) where {K,D}
     end
 end
 
-function iterate(dict::AVLDict)
+function Base.iterate(dict::AVLDict)
     ret = iterate(dict.tree)
     if ret === nothing
         return nothing
@@ -103,7 +103,7 @@ function iterate(dict::AVLDict)
     end
 end
 
-function iterate(dict::AVLDict, state)
+function Base.iterate(dict::AVLDict, state)
     ret = iterate(dict.tree, state)
     if ret === nothing
         return nothing
@@ -114,6 +114,10 @@ end
 
 function Base.show(io::IO, ::MIME"text/plain", t::AVLDict)
     return printtree(io, t.tree)
+end
+
+function Base.sizehint!(d::AVLDict, sz)
+    return d
 end
 
 # [10] copy(d::Dict) in Base at dict.jl:120

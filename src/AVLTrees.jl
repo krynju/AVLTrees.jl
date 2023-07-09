@@ -1,19 +1,26 @@
 module AVLTrees
 
 import Base:
-    iterate,
-    haskey,
-    getkey,
-    getindex,
-    setindex!,
-    length,
+    delete!,
     eltype,
+    firstindex,
+    get,
+    get!,
+    getindex,
+    getkey,
+    haskey,
+    insert!,
+    insert!,
     isempty,
-    insert!,
+    iterate,
+    length,
+    pop!,
     popfirst!,
-    insert!,
-    delete!
-print, show, firstindex, pop!, popfirst!, get, get!
+    popfirst!,
+    print,
+    setindex!,
+    show,
+    sizehint!
 
 include("node.jl")
 include("tree.jl")

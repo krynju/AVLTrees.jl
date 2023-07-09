@@ -282,7 +282,7 @@ end
     # @test_broken AVLDict(0.0=>1) != AVLDict(-0.0=>1)
     # @test_broken !isequal(AVLDict(0.0=>1), AVLDict(-0.0=>1))
 
-    @test AVLDict(1 => NaN) != AVLDict(1 => NaN)
+    @test AVLDict(1 => NaN) != AVLDict(1 => NaN) || VERSION < v"1.6.0"
     @test isequal(AVLDict(1 => NaN), AVLDict(1 => NaN))
 
     @test AVLDict(NaN => 1) == AVLDict(NaN => 1)
@@ -291,11 +291,11 @@ end
     @test ismissing(AVLDict(1 => missing) == AVLDict(1 => missing))
     @test isequal(AVLDict(1 => missing), AVLDict(1 => missing))
     d = AVLDict(1 => missing)
-    @test ismissing(d == d)
+    @test ismissing(d == d) || VERSION < v"1.6.0"
     d = AVLDict(1 => [missing])
-    @test ismissing(d == d)
+    @test ismissing(d == d) || VERSION < v"1.6.0"
     d = AVLDict(1 => NaN)
-    @test d != d
+    @test d != d || VERSION < v"1.6.0"
     @test isequal(d, d)
 
     @test AVLDict(missing => 1) == AVLDict(missing => 1)
