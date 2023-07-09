@@ -1,12 +1,12 @@
-Base.eltype(::Type{AVLTree{K, V}}) where {K, V} = Tuple{K, V}
+Base.eltype(::Type{AVLTree{K,V}}) where {K,V} = Tuple{K,V}
 
-Base.length(t::AVLTree{K, V}) where {K, V} = size(t)
-Base.isempty(t::AVLTree{K, V}) where {K, V} = t.root === nothing
+Base.length(t::AVLTree{K,V}) where {K,V} = size(t)
+Base.isempty(t::AVLTree{K,V}) where {K,V} = t.root === nothing
 Base.size(t::AVLTree) = __size(t.root)
 @inline __size(node::Node) = __size(node.left) + __size(node.right) + 1
 @inline __size(node::Nothing) = return 0
 
-@inline function Base.haskey(t::AVLTree{K, V}, k::K) where {K, V}
+@inline function Base.haskey(t::AVLTree{K,V}, k::K) where {K,V}
     node = t.root
     while node !== nothing
         if k < node.key
@@ -19,14 +19,14 @@ Base.size(t::AVLTree) = __size(t.root)
     end
     return false
 end
-Base.in(k::K, t::AVLTree{K, V}) where {K, V} = haskey(t, k)
+Base.in(k::K, t::AVLTree{K,V}) where {K,V} = haskey(t, k)
 
-Base.setindex!(tree::AVLTree{K, V}, v::V, k::K) where {K, V} = insert!(tree, k, v)
-Base.setindex!(tree::AVLTree{K, V}, v::V, k::Any) where {K, V} = insert!(tree, convert(K, k), v)
+Base.setindex!(tree::AVLTree{K,V}, v::V, k::K) where {K,V} = insert!(tree, k, v)
+Base.setindex!(tree::AVLTree{K,V}, v::V, k::Any) where {K,V} = insert!(tree, convert(K, k), v)
 
-Base.insert!(tree::AVLTree{K, V}, k::K, v::V) where {K, V} = insert_node!(tree, k, v)
+Base.insert!(tree::AVLTree{K,V}, k::K, v::V) where {K,V} = insert_node!(tree, k, v)
 
-function Base.delete!(tree::AVLTree{K, V}, key::K) where {K, V}
+function Base.delete!(tree::AVLTree{K,V}, key::K) where {K,V}
     node = find_node(tree, key)
     if node !== nothing
         delete_node!(tree, node)
@@ -34,9 +34,9 @@ function Base.delete!(tree::AVLTree{K, V}, key::K) where {K, V}
     return tree
 end
 
-Base.get(t::AVLTree{K, V}, k, default) where {K, V} = getkey(t, k, default)
+Base.get(t::AVLTree{K,V}, k, default) where {K,V} = getkey(t, k, default)
 
-function Base.get(f::Function, t::AVLTree{K, V}, k::K) where {K, V}
+function Base.get(f::Function, t::AVLTree{K,V}, k::K) where {K,V}
     node = find_node(t, k)
     if node === nothing
         return f()
@@ -45,7 +45,7 @@ function Base.get(f::Function, t::AVLTree{K, V}, k::K) where {K, V}
     end
 end
 
-function Base.get!(t::AVLTree{K, V}, k::K, default) where {K, V}
+function Base.get!(t::AVLTree{K,V}, k::K, default) where {K,V}
     node = find_node(t, k)
     if node === nothing
         insert!(t, k, default)
@@ -55,7 +55,7 @@ function Base.get!(t::AVLTree{K, V}, k::K, default) where {K, V}
     end
 end
 
-function Base.get!(f::Function, t::AVLTree{K, V}, k::K) where {K, V}
+function Base.get!(f::Function, t::AVLTree{K,V}, k::K) where {K,V}
     node = find_node(t, k)
     if node === nothing
         d = f()
@@ -66,7 +66,7 @@ function Base.get!(f::Function, t::AVLTree{K, V}, k::K) where {K, V}
     end
 end
 
-function Base.getindex(t::AVLTree{K, V}, k::K) where {K, V}
+function Base.getindex(t::AVLTree{K,V}, k::K) where {K,V}
     node = find_node(t, k)
     if node === nothing
         throw(KeyError(k))
@@ -75,7 +75,7 @@ function Base.getindex(t::AVLTree{K, V}, k::K) where {K, V}
     end
 end
 
-function Base.getkey(t::AVLTree{K, V}, k::T, default) where {K, V, T}
+function Base.getkey(t::AVLTree{K,V}, k::T, default) where {K,V,T}
     T !== K && return default
     node = find_node(t, k)
     if node === nothing
@@ -85,7 +85,7 @@ function Base.getkey(t::AVLTree{K, V}, k::T, default) where {K, V, T}
     end
 end
 
-function Base.getkey(t::AVLTree{K, V}, k::K, default) where {K, V}
+function Base.getkey(t::AVLTree{K,V}, k::K, default) where {K,V}
     node = find_node(t, k)
     if node === nothing
         return default
@@ -93,7 +93,6 @@ function Base.getkey(t::AVLTree{K, V}, k::K, default) where {K, V}
         return node.data
     end
 end
-
 
 function Base.iterate(t::AVLTree)
     if isempty(t)
@@ -105,7 +104,6 @@ function Base.iterate(t::AVLTree)
     end
     return (node.key, node.data), node
 end
-
 
 function Base.iterate(::AVLTree, node::Node)
     if node.right !== nothing
@@ -128,7 +126,6 @@ function Base.iterate(::AVLTree, node::Node)
     return (node.key, node.data), node
 end
 
-
 function Base.popfirst!(t::AVLTree)
     if isempty(t)
         throw(ArgumentError("Tree must be non-empty"))
@@ -142,7 +139,7 @@ function Base.popfirst!(t::AVLTree)
     return node_data
 end
 
-function Base.pop!(t::AVLTree{K, V}) where {K, V}
+function Base.pop!(t::AVLTree{K,V}) where {K,V}
     node = t.root
     node === nothing && ArgumentError("Tree must be non-empty")
     while node !== nothing
@@ -153,7 +150,7 @@ function Base.pop!(t::AVLTree{K, V}) where {K, V}
     return temp
 end
 
-function Base.pop!(t::AVLTree{K, V}, k::K) where {K, V}
+function Base.pop!(t::AVLTree{K,V}, k::K) where {K,V}
     if isempty(t)
         throw(ArgumentError("Tree must be non-empty"))
     end
@@ -168,7 +165,7 @@ function Base.pop!(t::AVLTree{K, V}, k::K) where {K, V}
     end
 end
 
-function Base.pop!(t::AVLTree{K, V}, k::K, default) where {K, V}
+function Base.pop!(t::AVLTree{K,V}, k::K, default) where {K,V}
     node = find_node(t, k)
     if node !== nothing
         temp = node
@@ -190,8 +187,7 @@ function Base.firstindex(t::AVLTree)
     return node.key
 end
 
-
-function Base.print(io::IO, t::AVLTree{K, V}) where {K, V}
+function Base.print(io::IO, t::AVLTree{K,V}) where {K,V}
     str_lst = Vector{String}()
     for (k, v) in Base.Iterators.take(t, 10)
         push!(str_lst, "$k => $v")
@@ -199,10 +195,10 @@ function Base.print(io::IO, t::AVLTree{K, V}) where {K, V}
     print(io, "AVLTree{$K,$D}(")
     print(io, join(str_lst, ", "))
     length(str_lst) == 10 && print(io, ", ⋯ ")
-    print(io, ")")
+    return print(io, ")")
 end
 
-function printtree(io::IO, t::AVLTree{K, V}) where {K, V}
+function printtree(io::IO, t::AVLTree{K,V}) where {K,V}
     str_lst = Vector{String}()
     indent_str = "  "
     for (k, v) in Base.Iterators.take(t, 10)
@@ -214,9 +210,9 @@ function printtree(io::IO, t::AVLTree{K, V}) where {K, V}
     else
         print(io, "AVLTree{$K,$V}()")
     end
-    length(str_lst) == 10 && print(io, "\n", indent_str * "⋮ => ⋮ \n")
+    return length(str_lst) == 10 && print(io, "\n", indent_str * "⋮ => ⋮ \n")
 end
 
-function Base.show(io::IO, ::MIME"text/plain", t::AVLTree{K, V}) where {K, V}
-    printtree(io ,t )
+function Base.show(io::IO, ::MIME"text/plain", t::AVLTree{K,V}) where {K,V}
+    return printtree(io, t)
 end

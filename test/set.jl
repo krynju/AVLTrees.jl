@@ -10,18 +10,18 @@
         r = collect(s)
         @test length(r) == 2
         @test all(items .∈ Ref(s))
-        @test all(items .∈ Ref(r)) 
+        @test all(items .∈ Ref(r))
         delete!(s, items[1])
         delete!(s, items[2])
         @test isempty(s)
     end
 
-    @testset "constructor with AbstractVector input" begin 
+    @testset "constructor with AbstractVector input" begin
         items = rand(1_000)
         s = AVLSet(items)
         @test eltype(items) == eltype(s)
         @test all(items .∈ Ref(s))
-        @test all(items .∈ Ref(collect(s)))   
+        @test all(items .∈ Ref(collect(s)))
     end
 
     @testset "union" begin
@@ -51,7 +51,7 @@
 
         sa = Set(a)
         sb = Set(b)
-    
+
         @test setdiff(avl_a, avl_b, avl_b) == setdiff(sa, sb)
         @test setdiff(avl_a, avl_a) == setdiff(sa, sa)
         @test setdiff(avl_a, sb) == setdiff(sa, sb)
@@ -66,10 +66,8 @@
 
         sa = Set(a)
         sb = Set(b)
-    
 
         @test intersect(avl_a, avl_b) == intersect(sa, sb)
         @test intersect(avl_a, avl_a) == intersect(sa, sa)
-        
     end
 end

@@ -1,6 +1,5 @@
 
 @testset "tree.jl" begin
-
     @testset "root insertion test" begin
         t = AVLTree{Int64,Int64}()
         insert!(t, 1, 2)
@@ -14,7 +13,6 @@
         @test t.root.data == 10
         @test size(t) == 1
     end
-
 
     @testset "left rotation test" begin
         t = AVLTree{Int64,Int64}()
@@ -122,7 +120,7 @@
 
     @testset "getkey test" begin
         t = AVLTree{Int64,Int64}()
-        for i = 1:1000
+        for i in 1:1000
             insert!(t, i, i)
         end
         @test size(t) == 1000
@@ -133,25 +131,25 @@
 
     @testset "iteration test" begin
         t = AVLTree{Int64,Int64}()
-        for i = 1:1000
+        for i in 1:1000
             insert!(t, i, i)
         end
-        s1 = Set{Tuple{Int64,Int64}}([(_x,_x) for _x in 1:1000])
+        s1 = Set{Tuple{Int64,Int64}}([(_x, _x) for _x in 1:1000])
         s2 = Set{Tuple{Int64,Int64}}()
         for i in t
-            push!(s2,i)
+            push!(s2, i)
         end
         @test s1 == s2
     end
 
     @testset "Base.*" begin
-        t = AVLTree{Int64, Int64}()
+        t = AVLTree{Int64,Int64}()
 
         for i in 1:100
             insert!(t, i, i)
         end
 
-        @test eltype(t) == Tuple{Int64, Int64}
+        @test eltype(t) == Tuple{Int64,Int64}
         @test getindex.(Ref(t), 1:100) == 1:100
         try
             getindex(t, -100)
@@ -160,8 +158,8 @@
         end
         setindex!(t, -10, 10)
         @test t[10] == -10
-        @test haskey(t,10)
-        @test !haskey(t,-10)
+        @test haskey(t, 10)
+        @test !haskey(t, -10)
         @test length(t) == 100
         t[-10] = -10
         @test length(t) == 101
@@ -171,6 +169,5 @@
         @test firstindex(t) == 1
         t[10] = 10
         @test getproperty.(pop!.(Ref(t), 1:100), :data) == 1:100
-
     end
 end

@@ -1,8 +1,8 @@
-mutable struct AVLTree{K, V}
-    root::Union{Node{K, V},Nothing}
+mutable struct AVLTree{K,V}
+    root::Union{Node{K,V},Nothing}
 
     function AVLTree{K,V}() where {K,V}
-        new(nothing)
+        return new(nothing)
     end
 end
 
@@ -29,26 +29,27 @@ macro rebalance!(_tree, _node, _height_changed)
     )
 end
 
-
-@inline function _rebalance_barrier_p2(tree::AVLTree{K, V}, node::Node{K, V}, node_right::Node{K, V}) where {K, V}
+@inline function _rebalance_barrier_p2(
+    tree::AVLTree{K,V}, node::Node{K,V}, node_right::Node{K,V}
+) where {K,V}
     height_changed = node_right.bf != zero(Int8)
     if node_right.bf == -one(Int8)
         rotate_right(tree, node_right, node_right.left)
     end
-    rotate_left(tree, node, node.right), height_changed
+    return rotate_left(tree, node, node.right), height_changed
 end
 
-
-@inline function _rebalance_barrier_n2(tree::AVLTree{K, V}, node::Node{K, V}, node_left::Node{K, V}) where {K, V}
+@inline function _rebalance_barrier_n2(
+    tree::AVLTree{K,V}, node::Node{K,V}, node_left::Node{K,V}
+) where {K,V}
     height_changed = node_left.bf != zero(Int8)
     if node_left.bf == one(Int8)
         rotate_left(tree, node_left, node_left.right)
     end
-    rotate_right(tree, node, node.left), height_changed
+    return rotate_right(tree, node, node.left), height_changed
 end
 
-
-@inline function insert_node!(tree::AVLTree{K, V}, key::K, data::V) where {K, V}
+@inline function insert_node!(tree::AVLTree{K,V}, key::K, data::V) where {K,V}
     parent = nothing
     node = tree.root
 
@@ -60,29 +61,26 @@ end
             node = node.right
         else
             node.data = data
-            return
+            return nothing
         end
     end
 
     if parent === nothing
-        tree.root = Node{K, V}(key, data)
+        tree.root = Node{K,V}(key, data)
     elseif key < parent.key
-        parent.left = Node{K, V}(key, data, parent)
+        parent.left = Node{K,V}(key, data, parent)
         balance_insertion(tree, parent, true)
     elseif key > parent.key
-        parent.right = Node{K, V}(key, data, parent)
+        parent.right = Node{K,V}(key, data, parent)
         balance_insertion(tree, parent, false)
     end
 
     return tree
 end
 
-
 @inline function balance_insertion(
-    tree::AVLTree{K, V},
-    node::Node{K, V},
-    left_insertion::Bool,
-) where {K, V}
+    tree::AVLTree{K,V}, node::Node{K,V}, left_insertion::Bool
+) where {K,V}
     while true
         node.bf += ifelse(left_insertion, -one(Int8), one(Int8))
         height_changed = false
@@ -99,8 +97,7 @@ end
     end
 end
 
-
-@inline function delete_node!(tree::AVLTree{K, V}, node::Node{K, V}) where {K, V}
+@inline function delete_node!(tree::AVLTree{K,V}, node::Node{K,V}) where {K,V}
     if node.left !== nothing
         node_right = node.right
         if node_right !== nothing
@@ -140,15 +137,11 @@ end
     return tree
 end
 
-
 @inline balance_deletion(tree::AVLTree, node::Nothing, left_delete::Bool) = return nothing
 
-
 @inline function balance_deletion(
-    tree::AVLTree{K, V},
-    node::Node{K, V},
-    left_delete::Bool,
-) where {K, V}
+    tree::AVLTree{K,V}, node::Node{K,V}, left_delete::Bool
+) where {K,V}
     while node !== nothing
         node.bf += ifelse(left_delete, one(Int8), -one(Int8))
         height_changed = false
@@ -165,8 +158,7 @@ end
     end
 end
 
-
-@inline function rotate_left(t::AVLTree{K, V}, x::Node{K, V}, x_right::Node{K, V}) where {K, V}
+@inline function rotate_left(t::AVLTree{K,V}, x::Node{K,V}, x_right::Node{K,V}) where {K,V}
     y = x_right
 
     if y.left !== nothing
@@ -197,8 +189,7 @@ end
     return y
 end
 
-
-@inline function rotate_right(t::AVLTree{K, V}, x::Node{K, V}, x_left::Node{K, V}) where {K, V}
+@inline function rotate_right(t::AVLTree{K,V}, x::Node{K,V}, x_left::Node{K,V}) where {K,V}
     y = x_left
 
     if y.right !== nothing
@@ -229,15 +220,12 @@ end
     return y
 end
 
-
 #    __parent_replace(tree::AVLTree{K, V}, node::Node{K, V}, replacement::Node{K, V})
 #
 # Replaces node with its only child. Used on nodes with a single child when erasing a node.
 @inline function __parent_replace(
-    tree::AVLTree{K, V},
-    node::Node{K, V},
-    replacement::Node{K, V},
-) where {K, V}
+    tree::AVLTree{K,V}, node::Node{K,V}, replacement::Node{K,V}
+) where {K,V}
     node_parent = node.parent
     if node_parent !== nothing
         replacement.parent = node_parent
@@ -255,15 +243,12 @@ end
     end
 end
 
-
 #    __parent_replace(tree::AVLTree{K, V}, node::Node{K, V}, replacement::Nothing)
 #
 # Replaces node with nothing. Used on leaf nodes when erasing a node.
 @inline function __parent_replace(
-    tree::AVLTree{K, V},
-    node::Node{K, V},
-    replacement::Nothing,
-) where {K, V}
+    tree::AVLTree{K,V}, node::Node{K,V}, replacement::Nothing
+) where {K,V}
     node_parent = node.parent
     if node_parent !== nothing
         if node_parent.right == node
@@ -279,21 +264,18 @@ end
     end
 end
 
-
-
-
 ##############################################################
 # Utilities
 ##############################################################
-@inline function find_node(tree::AVLTree{Nothing, V}, ::Nothing) where { V}
+@inline function find_node(tree::AVLTree{Nothing,V}, ::Nothing) where {V}
     return tree.root
 end
 
-@inline function find_node(tree::AVLTree{Missing, V}, ::Missing) where { V}
+@inline function find_node(tree::AVLTree{Missing,V}, ::Missing) where {V}
     return tree.root
 end
 
-@inline function find_node(tree::AVLTree{K, V}, key::K) where {K, V}
+@inline function find_node(tree::AVLTree{K,V}, key::K) where {K,V}
     node = tree.root
     while node !== nothing
         if key < node.key
@@ -307,23 +289,23 @@ end
     return nothing
 end
 
-@inline function empty_tree!(tree::AVLTree{K, V}) where {K, V}
+@inline function empty_tree!(tree::AVLTree{K,V}) where {K,V}
     empty_node!(tree.root)
-    tree.root = nothing
+    return tree.root = nothing
 end
 
-function empty_node!(node::Node{K, V}) where {K, V}
+function empty_node!(node::Node{K,V}) where {K,V}
     empty_node!(node.left)
     empty_node!(node.right)
     node.left = nothing
     node.right = nothing
-    node.parent = nothing
+    return node.parent = nothing
 end
 
 empty_node!(node::Nothing) = return nothing
 
 function printtree(tree::AVLTree)
-    fifo = Vector{Union{Nothing, Node}}()
+    fifo = Vector{Union{Nothing,Node}}()
     push!(fifo, tree.root)
 
     maxlen = 2^(height(tree)) - 1
@@ -334,8 +316,8 @@ function printtree(tree::AVLTree)
         n = popfirst!(fifo)
         if n isa Node
             print("$(n.key), ")
-            push!(fifo,n.left)
-            push!(fifo,n.right)
+            push!(fifo, n.left)
+            push!(fifo, n.right)
         else
             print("n, ")
         end
@@ -345,13 +327,13 @@ end
 
 function height(tree::AVLTree)
     isempty(tree) && return 0
-    height(tree.root, 0)
+    return height(tree.root, 0)
 end
 
 function height(node::Node, level)
     l = height(node.left, level)
     r = height(node.right, level)
-    maximum([l, r]) + 1
+    return maximum([l, r]) + 1
 end
 
 function height(node::Nothing, level)
