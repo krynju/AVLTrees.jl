@@ -39,7 +39,7 @@ function prepare_t_delete(t)
     t
 end
 
-for attempt in 1:5
+for attempt in 1:3
     for N in x
         global t = AVLTree{Int64,Int64}()
         rng = MersenneTwister(1111)
@@ -80,3 +80,22 @@ plot(
     legend=:topleft,
 )
 
+savefig("benchmark/result.svg")
+
+plot(
+    x,
+    [c[(c.op.=="insert"),:].time_minimum,c[(c.op.=="delete"),:].time_minimum, c[(c.op.=="search"),:].time_minimum],
+    xscale = :log10,
+    yscale = :log10,
+    ylabel = "operation time [ns]",
+    xlabel = "N",
+    xticks = [1e3, 1e4, 1e5, 1e6, 1e7],
+    markershape =[:diamond :utriangle :dtriangle],
+    labels= ["insert" "delete" "lookup"],
+    legend=:right,
+)
+
+savefig("benchmark/result_log.svg")
+
+using CSV
+CSV.write("benchmark/results.csv", c)

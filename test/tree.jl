@@ -1,12 +1,11 @@
 
 @testset "tree.jl" begin
-    
     @testset "root insertion test" begin
         t = AVLTree{Int64,Int64}()
         insert!(t, 1, 2)
-        @test !isnothing(t.root)
+        @test t.root !== nothing
         @test t.root.bf == 0
-        @test isnothing(t.root.right) && isnothing(t.root.left)
+        @test t.root.right === nothing && t.root.left === nothing
         @test t.root.key == 1 && t.root.data == 2
         @test size(t) == 1
         insert!(t, 1, 10)
@@ -14,7 +13,6 @@
         @test t.root.data == 10
         @test size(t) == 1
     end
-
 
     @testset "left rotation test" begin
         t = AVLTree{Int64,Int64}()
@@ -35,7 +33,7 @@
         @test t.root.key == 2 && t.root.left.key == 1 && t.root.right.key == 3
         @test size(t) == 3
     end
- 
+
     @testset "left-right rotation test" begin
         t = AVLTree{Int64,Int64}()
         insert!(t, 3, 2)
@@ -80,17 +78,17 @@
         insert!(t, 2, 2)
         insert!(t, 3, 2)
         @test size(t) == 3
-        delete!(t, t.root.left)
-        @test isnothing(t.root.left)
+        AVLTrees.delete_node!(t, t.root.left)
+        @test t.root.left === nothing
         @test t.root.bf == 1
         @test size(t) == 2
-        delete!(t, t.root.right)
-        @test isnothing(t.root.right)
+        AVLTrees.delete_node!(t, t.root.right)
+        @test t.root.right === nothing
         @test t.root.bf == 0
         @test size(t) == 1
-        delete!(t, t.root)
+        AVLTrees.delete_node!(t, t.root)
         @test size(t) == 0
-        @test isnothing(t.root)
+        @test t.root === nothing
     end
 
     @testset "fill and delete all test" begin
@@ -99,10 +97,10 @@
             insert!(t, i, 0)
         end
         @test size(t) <= 100
-        while !isnothing(t.root)
-            delete!(t, t.root)
+        while t.root !== nothing
+            AVLTrees.delete_node!(t, t.root)
         end
-        @test isnothing(t.root)
+        @test t.root === nothing
         @test size(t) == 0
     end
 
@@ -117,51 +115,51 @@
             delete!(t, i)
         end
         @test size(t) == 0
-        @test isnothing(t.root)
+        @test t.root === nothing
     end
 
-    @testset "findkey test" begin
+    @testset "getkey test" begin
         t = AVLTree{Int64,Int64}()
-        for i = 1:1000
+        for i in 1:1000
             insert!(t, i, i)
         end
         @test size(t) == 1000
-        @test 500 == findkey(t, 500)
-        @test nothing == findkey(t, 1001)
+        @test 500 == getkey(t, 500, nothing)
+        @test nothing === getkey(t, 1001, nothing)
         @test size(t) == 1000
     end
 
     @testset "iteration test" begin
         t = AVLTree{Int64,Int64}()
-        for i = 1:1000
+        for i in 1:1000
             insert!(t, i, i)
         end
-        s1 = Set{Tuple{Int64,Int64}}([(_x,_x) for _x in 1:1000])
+        s1 = Set{Tuple{Int64,Int64}}([(_x, _x) for _x in 1:1000])
         s2 = Set{Tuple{Int64,Int64}}()
         for i in t
-            push!(s2,i)
+            push!(s2, i)
         end
         @test s1 == s2
     end
 
     @testset "Base.*" begin
-        t = AVLTree{Int64, Int64}()
+        t = AVLTree{Int64,Int64}()
 
         for i in 1:100
             insert!(t, i, i)
         end
 
-        @test eltype(t) == Tuple{Int64, Int64}
+        @test eltype(t) == Tuple{Int64,Int64}
         @test getindex.(Ref(t), 1:100) == 1:100
         try
             getindex(t, -100)
         catch x
             @test x == KeyError(-100)
         end
-        setindex!(t, 10, -10) 
+        setindex!(t, -10, 10)
         @test t[10] == -10
-        @test haskey(t,10) 
-        @test !haskey(t,-10)
+        @test haskey(t, 10)
+        @test !haskey(t, -10)
         @test length(t) == 100
         t[-10] = -10
         @test length(t) == 101
@@ -170,9 +168,6 @@
         @test popfirst!(t) == -10
         @test firstindex(t) == 1
         t[10] = 10
-        @test pop!.(Ref(t), 1:100) == 1:100
-
+        @test getproperty.(pop!.(Ref(t), 1:100), :data) == 1:100
     end
-    
-
 end

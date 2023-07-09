@@ -5,4 +5,5 @@ using Test
     include("node.jl")
     include("tree.jl")
     include("set.jl")
+    include("base_dict.jl")
 end

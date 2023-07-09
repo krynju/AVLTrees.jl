@@ -1,13 +1,14 @@
 name = "AVLTrees"
 uuid = "4459d02e-7d0b-4014-b2a2-e38a540ff820"
 authors = ["krynju <gulinski.krystian@gmail.com>"]
-version = "0.3.4"
+version = "0.4.0"
 
 [compat]
-julia = "1.1"
+julia = "1.0"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [targets]
-test = ["Test"]
+test = ["Test", "Random"]
