@@ -3,9 +3,9 @@
     @testset "root insertion test" begin
         t = AVLTree{Int64,Int64}()
         insert!(t, 1, 2)
-        @test !isnothing(t.root)
+        @test t.root !== nothing
         @test t.root.bf == 0
-        @test isnothing(t.root.right) && isnothing(t.root.left)
+        @test t.root.right === nothing && t.root.left === nothing
         @test t.root.key == 1 && t.root.data == 2
         @test size(t) == 1
         insert!(t, 1, 10)
@@ -79,16 +79,16 @@
         insert!(t, 3, 2)
         @test size(t) == 3
         AVLTrees.delete_node!(t, t.root.left)
-        @test isnothing(t.root.left)
+        @test t.root.left === nothing
         @test t.root.bf == 1
         @test size(t) == 2
         AVLTrees.delete_node!(t, t.root.right)
-        @test isnothing(t.root.right)
+        @test t.root.right === nothing
         @test t.root.bf == 0
         @test size(t) == 1
         AVLTrees.delete_node!(t, t.root)
         @test size(t) == 0
-        @test isnothing(t.root)
+        @test t.root === nothing
     end
 
     @testset "fill and delete all test" begin
@@ -97,10 +97,10 @@
             insert!(t, i, 0)
         end
         @test size(t) <= 100
-        while !isnothing(t.root)
+        while t.root !== nothing
             AVLTrees.delete_node!(t, t.root)
         end
-        @test isnothing(t.root)
+        @test t.root === nothing
         @test size(t) == 0
     end
 
@@ -115,7 +115,7 @@
             delete!(t, i)
         end
         @test size(t) == 0
-        @test isnothing(t.root)
+        @test t.root === nothing
     end
 
     @testset "getkey test" begin
