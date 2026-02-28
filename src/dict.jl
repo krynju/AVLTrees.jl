@@ -8,18 +8,37 @@ struct AVLDict{K,D} <: AbstractDict{K,D}
         return new(t)
     end
     function AVLDict{K,D}(d::AVLDict{K,D}) where {K,D}
-        # copy here
-        return d
+        return new(deepcopy(d.tree))
     end
 end
 
 AVLDict() = AVLDict{Any,Any}()
-# AVLDict{K,D}(d::AVLDict{K,D})  where {K,D} = d
-# AVLDict{K,D}() where {K,D} = AVLDict{K,D}(AVLTree{K,D}())
+
 function AVLDict(kv)
     try
-        Base.dict_with_eltype((K, V) -> AVLDict{K,V}, kv, eltype(kv))
-    catch
+        # Infer types from the eltype of the iterable
+        if isa(kv, Union{AbstractArray, Tuple}) || Base.IteratorSize(typeof(kv)) isa Base.HasShape
+            et = eltype(kv)
+            if et <: Pair
+                # Extract K, V from Pair{K,V}
+                if isdefined(et, :parameters) && length(et.parameters) >= 2
+                    K, V = et.parameters[1], et.parameters[2]
+                    return AVLDict{K,V}(kv)
+                end
+            elseif et <: Tuple && isdefined(et, :parameters) && length(et.parameters) == 2
+                # Extract K, V from Tuple{K,V}
+                K, V = et.parameters[1], et.parameters[2]
+                return AVLDict{K,V}(kv)
+            end
+        end
+        # Fallback: collect and infer from actual values
+        pairs = collect(kv)
+        if isempty(pairs)
+            return AVLDict{Any,Any}()
+        end
+        K, V = _promote_pair_types(pairs)
+        return AVLDict{K,V}(pairs)
+    catch e
         if !Base.isiterable(typeof(kv)) || !all(x -> isa(x, Union{Tuple,Pair}), kv)
             throw(ArgumentError("AVLDict(kv): kv needs to be an iterator of tuples or pairs"))
         else
@@ -36,13 +55,35 @@ function AVLDict{K,V}(kv) where {K,V}
 end
 AVLDict(::Tuple{}) = AVLDict()
 
+# Helper function to promote types with Union support, matching Base Dict behavior
+# Works with both Pairs and 2-tuples
+function _promote_pair_types(ps)
+    types_first = [typeof(k) for (k, v) in ps]
+    types_second = [typeof(v) for (k, v) in ps]
+
+    function _infer_type(types)
+        unique_types = unique(types)
+        if length(unique_types) == 1
+            return unique_types[1]
+        end
+        # Use promote_typejoin just like Base Dict does
+        return reduce(Base.promote_typejoin, unique_types)
+    end
+
+    return _infer_type(types_first), _infer_type(types_second)
+end
+
 function AVLDict(ps::Pair...)
-    return AVLDict(ps)
+    isempty(ps) && return AVLDict()
+    K, V = _promote_pair_types(ps)
+    return AVLDict{K,V}(ps...)
 end
 
 function AVLDict{K,V}(ps::Pair...) where {K,V}
     t = AVLTree{K,V}()
-    for (k, d) in ps
+    for p in ps
+        k = convert(K, p.first)
+        d = convert(V, p.second)
         insert!(t, k, d)
     end
     return AVLDict{K,V}(t)
@@ -119,10 +160,7 @@ function Base.sizehint!(d::AVLDict, sz)
     return d
 end
 
-# [10] copy(d::Dict) in Base at dict.jl:120
-# [13] filter!(pred, h::Dict{K, V}) where {K, V} in Base at dict.jl:703
-# [25] mergewith!(combine, d1::Dict{K, V}, d2::AbstractDict) where {K, V} in Base at dict.jl:731
-Base.copy(d::AVLDict{K,D}) where {K,D} = AVLDict{K,D}(d.tree)
+Base.copy(d::AVLDict{K,D}) where {K,D} = AVLDict{K,D}(deepcopy(d.tree))
 
 function Base.copy!(dest::AVLDict{K,D}, src::AVLDict{K,D}) where {K,D}
     empty_tree!(dest.tree)
