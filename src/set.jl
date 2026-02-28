@@ -66,3 +66,78 @@ function Base.intersect!(set::AVLSet{K}, s::AbstractSet) where {K}
     end
     return set
 end
+Base.copy(s::AVLSet{K}) where {K} = AVLSet{K}(deepcopy(s.tree))
+
+function Base.copy!(dest::AVLSet{K}, src::AVLSet{K}) where {K}
+    empty!(dest)
+    for item in src
+        push!(dest, item)
+    end
+    return dest
+end
+
+function Base.similar(s::AVLSet{K}) where {K}
+    return AVLSet{K}()
+end
+
+function Base.similar(s::AVLSet{K}, ::Type{K2}) where {K,K2}
+    return AVLSet{K2}()
+end
+
+Base.empty(s::AVLSet{K}) where {K} = AVLSet{K}()
+Base.empty(::Type{AVLSet{K}}) where {K} = AVLSet{K}()
+
+function Base.empty!(s::AVLSet{K}) where {K}
+    empty_tree!(s.tree)
+    return s
+end
+
+Base.last(s::AVLSet{K}) where {K} = popfirst!(deepcopy(s.tree))
+
+function Base.:(==)(s1::AVLSet{K}, s2::AVLSet{K}) where {K}
+    if length(s1) != length(s2)
+        return false
+    end
+    for item in s1
+        if !in(item, s2)
+            return false
+        end
+    end
+    return true
+end
+
+function Base.:(==)(s1::AVLSet, s2::AVLSet)
+    if length(s1) != length(s2)
+        return false
+    end
+    for item in s1
+        if !in(item, s2)
+            return false
+        end
+    end
+    return true
+end
+
+function Base.isequal(s1::AVLSet{K}, s2::AVLSet{K}) where {K}
+    if length(s1) != length(s2)
+        return false
+    end
+    for item in s1
+        if !in(item, s2)
+            return false
+        end
+    end
+    return true
+end
+
+function Base.isequal(s1::AVLSet, s2::AVLSet)
+    if length(s1) != length(s2)
+        return false
+    end
+    for item in s1
+        if !in(item, s2)
+            return false
+        end
+    end
+    return true
+end

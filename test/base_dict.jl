@@ -157,14 +157,14 @@ end
     @test isa(repr(d), AbstractString)  # check that printable without error
 end
 
-# @testset "issue #2344" begin
-#     local bar
-#     bestkey(d, key) = key
-#     bestkey(d::AVLDict{K,V}, key) where {K<:AbstractString,V} = string(key)
-#     bar(x) = bestkey(x, :y)
-#     @test bar(AVLDict(:x => [1,2,5])) === :y
-#     @test bar(AVLDict("x" => [1,2,5])) == "y"
-# end
+@testset "issue #2344" begin
+    local bar
+    bestkey(d, key) = key
+    bestkey(d::AVLDict{K,V}, key) where {K<:AbstractString,V} = string(key)
+    bar(x) = bestkey(x, :y)
+    @test bar(AVLDict(:x => [1,2,5])) === :y
+    @test bar(AVLDict("x" => [1,2,5])) == "y"
+end
 
 mutable struct I1438T
     id
@@ -276,11 +276,11 @@ end
 end
 
 @testset "equality special cases" begin
-    # @test_broken AVLDict(1=>0.0) == AVLDict(1=>-0.0)
-    # @test_broken !isequal(AVLDict(1=>0.0), AVLDict(1=>-0.0))
+    # @test AVLDict(1=>0.0) == AVLDict(1=>-0.0)
+    # @test !isequal(AVLDict(1=>0.0), AVLDict(1=>-0.0))
 
-    # @test_broken AVLDict(0.0=>1) != AVLDict(-0.0=>1)
-    # @test_broken !isequal(AVLDict(0.0=>1), AVLDict(-0.0=>1))
+    # @test AVLDict(0.0=>1) != AVLDict(-0.0=>1)
+    # @test !isequal(AVLDict(0.0=>1), AVLDict(-0.0=>1))
 
     @test AVLDict(1 => NaN) != AVLDict(1 => NaN) || VERSION < v"1.6.0"
     @test isequal(AVLDict(1 => NaN), AVLDict(1 => NaN))

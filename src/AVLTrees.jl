@@ -1,8 +1,12 @@
 module AVLTrees
 
 import Base:
+    copy,
+    copy!,
     delete!,
     eltype,
+    empty,
+    empty!,
     firstindex,
     get,
     get!,
@@ -11,8 +15,10 @@ import Base:
     haskey,
     insert!,
     insert!,
+    isequal,
     isempty,
     iterate,
+    last,
     length,
     pop!,
     popfirst!,
@@ -20,7 +26,9 @@ import Base:
     print,
     setindex!,
     show,
-    sizehint!
+    similar,
+    sizehint!,
+    :(==)
 
 include("node.jl")
 include("tree.jl")

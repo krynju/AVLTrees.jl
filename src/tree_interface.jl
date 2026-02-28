@@ -7,17 +7,7 @@ Base.size(t::AVLTree) = __size(t.root)
 @inline __size(node::Nothing) = return 0
 
 @inline function Base.haskey(t::AVLTree{K,V}, k::K) where {K,V}
-    node = t.root
-    while node !== nothing
-        if k < node.key
-            node = node.left
-        elseif k > node.key
-            node = node.right
-        else
-            return true
-        end
-    end
-    return false
+    return find_node(t, k) !== nothing
 end
 Base.in(k::K, t::AVLTree{K,V}) where {K,V} = haskey(t, k)
 
