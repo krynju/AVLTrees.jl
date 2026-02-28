@@ -363,7 +363,11 @@ end
 
     # Test mergewith!
     d11 = AVLDict(1 => 2, 2 => 3)
-    AVLTrees.mergewith!(+, d11, AVLDict(2 => 4, 3 => 5))
+    if VERSION >= v"1.5"
+        mergewith!(+, d11, AVLDict(2 => 4, 3 => 5))
+    else
+        AVLTrees.mergewith!(+, d11, AVLDict(2 => 4, 3 => 5))
+    end
     @test d11 == AVLDict(1 => 2, 2 => 7, 3 => 5)
 end
 
