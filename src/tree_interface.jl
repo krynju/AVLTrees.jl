@@ -113,9 +113,7 @@ function Base.get!(f::Function, t::AVLTree{K,V}, k) where {K,V}
             convert(K, k)
         catch e
             if e isa MethodError || e isa TypeError || e isa InexactError
-                d = f()
-                insert!(t, convert(K, k), d)
-                return d
+                return f()
             end
             rethrow()
         end

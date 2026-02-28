@@ -264,7 +264,7 @@ end
     @test !eq(d1, d2)
     # Changing a value gives different dict
     d3[data_in[rand(1:length(data_in))][1]] = randstring(3)
-    !eq(d1, d3)
+    @test !eq(d1, d3)
     # Adding a pair gives different dict
     d4[1001] = randstring(3)
     @test !eq(d1, d4)

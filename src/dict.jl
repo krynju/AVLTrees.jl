@@ -175,8 +175,7 @@ function Base.pop!(dict::AVLDict{K,D}) where {K,D}
     return saved_key => saved_data
 end
 
-function Base.pop!(dict::AVLDict{K,D}, k, default_unused...) where {K,D}
-    has_default = !isempty(default_unused)
+function Base.pop!(dict::AVLDict{K,D}, k) where {K,D}
     typed_key = if k isa K
         k
     else
@@ -184,22 +183,34 @@ function Base.pop!(dict::AVLDict{K,D}, k, default_unused...) where {K,D}
             convert(K, k)
         catch e
             if e isa MethodError || e isa TypeError || e isa InexactError
-                if has_default
-                    return default_unused[1]
-                else
-                    throw(KeyError(k))
-                end
+                throw(KeyError(k))
+            end
+            rethrow()
+        end
+    end
+    node = find_node(dict.tree, typed_key)
+    node === nothing && throw(KeyError(k))
+    saved_data = node.data
+    delete_node!(dict.tree, node)
+    return saved_data
+end
+
+function Base.pop!(dict::AVLDict{K,D}, k, default) where {K,D}
+    typed_key = if k isa K
+        k
+    else
+        try
+            convert(K, k)
+        catch e
+            if e isa MethodError || e isa TypeError || e isa InexactError
+                return default
             end
             rethrow()
         end
     end
     node = find_node(dict.tree, typed_key)
     if node === nothing
-        if has_default
-            return default_unused[1]
-        else
-            throw(KeyError(k))
-        end
+        return default
     end
     saved_data = node.data
     delete_node!(dict.tree, node)
