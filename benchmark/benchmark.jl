@@ -2,7 +2,7 @@ using AVLTrees, BenchmarkTools
 using Random
 using Plots
 using DataFrames
-
+using CSV
 
 function batch_insert!(t::AVLTree{K,D}, v::Vector{K}) where {K,D}
     for i in v
@@ -17,9 +17,11 @@ function batch_delete!(t::AVLTree{K,D}, v::Vector{K}) where {K,D}
 end
 
 function batch_find(t::AVLTree{K,D}, v::Vector{K}) where {K,D}
+    hits = 0
     for i in v
-        i in t
+        hits += haskey(t, i)
     end
+    return hits
 end
 
 d = DataFrame((op=[], time=[], n=[]))
@@ -39,7 +41,7 @@ function prepare_t_delete(t)
     t
 end
 
-for attempt in 1:5
+for attempt in 1:3
     for N in x
         global t = AVLTree{Int64,Int64}()
         rng = MersenneTwister(1111)
@@ -51,11 +53,11 @@ for attempt in 1:5
             insert!(t, i, i)
         end
 
-        insertion = @benchmark batch_insert!(_t, nums_test) evals=1 setup=(_t=prepare_t_insert(t))
-        deletion = @benchmark batch_delete!(_t, nums_test) evals=1 setup=(_t=prepare_t_delete(t))
+        insertion = @benchmark batch_insert!(_t, $nums_test) evals=1 setup=(_t=prepare_t_insert($t))
+        deletion = @benchmark batch_delete!(_t, $nums_test) evals=1 setup=(_t=prepare_t_delete($t))
 
         batch_insert!(t, nums_test)
-        search = @benchmark batch_find(t, nums_test)
+        search = @benchmark batch_find($t, $nums_test) evals=1
 
         push!(d, ("insert", minimum(insertion).time/nn, N))
         push!(d, ("delete", minimum(deletion).time/nn,N))
@@ -66,6 +68,7 @@ end
 
 c = combine(groupby(d, [:op,:n]), :time => minimum)
 
+# c = CSV.read("benchmark/results.csv", DataFrame)
 
 plot(
     x,
@@ -80,3 +83,21 @@ plot(
     legend=:topleft,
 )
 
+savefig("benchmark/result.svg")
+
+plot(
+    x,
+    [c[(c.op.=="insert"),:].time_minimum,c[(c.op.=="delete"),:].time_minimum, c[(c.op.=="search"),:].time_minimum],
+    xscale = :log10,
+    yscale = :log10,
+    ylabel = "operation time [ns]",
+    xlabel = "N",
+    xticks = [1e3, 1e4, 1e5, 1e6, 1e7],
+    markershape =[:diamond :utriangle :dtriangle],
+    labels= ["insert" "delete" "lookup"],
+    legend=:right,
+)
+
+savefig("benchmark/result_log.svg")
+
+CSV.write("benchmark/results.csv", c)

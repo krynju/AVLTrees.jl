@@ -3,3 +3,4 @@
 /dev/
 .vscode/settings.json
 *.mem
+test/Manifest.toml
