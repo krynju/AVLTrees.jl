@@ -58,8 +58,20 @@ AVLDict(::Tuple{}) = AVLDict()
 # Helper function to promote types with Union support, matching Base Dict behavior
 # Works with both Pairs and 2-tuples
 function _promote_pair_types(ps)
-    types_first = [typeof(k) for (k, v) in ps]
-    types_second = [typeof(v) for (k, v) in ps]
+    types_first = DataType[]
+    types_second = DataType[]
+
+    for item in ps
+        if item isa Pair
+            push!(types_first, typeof(item.first))
+            push!(types_second, typeof(item.second))
+        elseif item isa Tuple && length(item) == 2
+            push!(types_first, typeof(item[1]))
+            push!(types_second, typeof(item[2]))
+        else
+            throw(ArgumentError("_promote_pair_types: expected Pair or 2-tuple elements"))
+        end
+    end
 
     function _infer_type(types)
         unique_types = unique(types)
@@ -108,7 +120,13 @@ Base.delete!(dict::AVLDict{K,D}, k::K) where {K,D} = delete!(dict.tree, k)
 
 Base.getindex(dict::AVLDict{K,D}, k::K) where {K,D} = getindex(dict.tree, k)
 
-Base.getkey(dict::AVLDict{K,D}, k) where {K,D} = getkey(dict.tree, k)
+function Base.getkey(dict::AVLDict{K,D}, k) where {K,D}
+    if k isa K && haskey(dict.tree, k)
+        return dict.tree[k]
+    end
+    throw(KeyError(k))
+end
+
 Base.getkey(dict::AVLDict{K,D}, k, default) where {K,D} = getkey(dict.tree, k, default)
 Base.isempty(dict::AVLDict) = isempty(dict.tree)
 Base.length(dict::AVLDict) = length(dict.tree)
