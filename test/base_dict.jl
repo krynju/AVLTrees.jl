@@ -330,3 +330,97 @@ end
     @test getkey(h, 4, 6) == 6
     @test getkey(h, "1", 8) == 8
 end
+
+@testset "merge and merge!" begin
+    d1 = AVLDict(1 => 2, 3 => 4)
+    d2 = AVLDict(5 => 6, 7 => 8)
+    d3 = merge(d1, d2)
+    @test d3 isa AVLDict{Int,Int}
+    @test d3 == AVLDict(1 => 2, 3 => 4, 5 => 6, 7 => 8)
+    @test d1 == AVLDict(1 => 2, 3 => 4)  # d1 unchanged
+
+    # Test merge with overlapping keys
+    d4 = AVLDict(1 => 10, 3 => 30)
+    d5 = merge(d1, d4)
+    @test d5 == AVLDict(1 => 10, 3 => 30)  # d4 values win
+
+    # Test merge with multiple dicts
+    d6 = merge(d1, d2, d4)
+    @test d6 isa AVLDict{Int,Int}
+    @test d6 == AVLDict(1 => 10, 3 => 30, 5 => 6, 7 => 8)
+
+    # Test merge! (in-place)
+    d7 = AVLDict(1 => 2, 3 => 4)
+    merge!(d7, AVLDict(3 => 99, 5 => 6))
+    @test d7 == AVLDict(1 => 2, 3 => 99, 5 => 6)
+
+    # Test merge with combining function
+    d8 = AVLDict(1 => 2, 2 => 3)
+    d9 = AVLDict(2 => 4, 3 => 5)
+    d10 = merge(+, d8, d9)
+    @test d10 isa AVLDict{Int,Int}
+    @test d10 == AVLDict(1 => 2, 2 => 7, 3 => 5)
+
+    # Test mergewith!
+    d11 = AVLDict(1 => 2, 2 => 3)
+    mergewith!(+, d11, AVLDict(2 => 4, 3 => 5))
+    @test d11 == AVLDict(1 => 2, 2 => 7, 3 => 5)
+end
+
+@testset "keys, values, pairs" begin
+    d = AVLDict(1 => 2, 3 => 4, 5 => 6)
+    
+    k = collect(keys(d))
+    @test sort(k) == [1, 3, 5]
+    
+    v = collect(values(d))
+    @test sort(v) == [2, 4, 6]
+    
+    p = collect(pairs(d))
+    @test sort(p, by = x -> x.first) == [1 => 2, 3 => 4, 5 => 6]
+    
+    # Test that keys/values/pairs work with iteration
+    @test sum(keys(d)) == 9
+    @test sum(values(d)) == 12
+end
+
+@testset "filter and filter!" begin
+    d = AVLDict(1 => 2, 2 => 4, 3 => 6, 4 => 8)
+    
+    # Test filter (returns new dict)
+    d2 = filter(p -> p.second > 4, d)
+    @test d2 isa AVLDict{Int,Int}
+    @test d2 == AVLDict(3 => 6, 4 => 8)
+    @test d == AVLDict(1 => 2, 2 => 4, 3 => 6, 4 => 8)  # original unchanged
+    
+    # Test filter with key/value function
+    d3 = filter(p -> p.first > 2, d)
+    @test d3 == AVLDict(3 => 6, 4 => 8)
+    
+    # Test filter! (in-place)
+    d4 = AVLDict(1 => 2, 2 => 4, 3 => 6, 4 => 8)
+    filter!(p -> iseven(p.first), d4)
+    @test d4 == AVLDict(2 => 4, 4 => 8)
+end
+
+@testset "push! with Pairs" begin
+    d = AVLDict(1 => 2)
+    push!(d, 3 => 4)
+    @test d == AVLDict(1 => 2, 3 => 4)
+    
+    # Test push! with multiple pairs
+    push!(d, 5 => 6, 7 => 8)
+    @test d == AVLDict(1 => 2, 3 => 4, 5 => 6, 7 => 8)
+    
+    # Test push! overwrites existing key
+    push!(d, 1 => 99)
+    @test d[1] == 99
+end
+
+@testset "in with Pairs" begin
+    d = AVLDict(1 => 2, 3 => 4)
+    @test (1 => 2) in d
+    @test !((1 => 3) in d)  # wrong value
+    @test !((2 => 2) in d)  # wrong key
+    @test !((5 => 6) in d)  # not present
+end

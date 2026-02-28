@@ -115,6 +115,19 @@ Base.length(dict::AVLDict) = length(dict.tree)
 
 Base.setindex!(dict::AVLDict{K,D}, d::D, k::K) where {K,D} = setindex!(dict.tree, d, k)
 
+function Base.push!(dict::AVLDict{K,D}, p::Pair) where {K,D}
+    dict[p.first] = p.second
+    return dict
+end
+
+function Base.push!(dict::AVLDict{K,D}, p::Pair, q::Pair...) where {K,D}
+    push!(dict, p)
+    for pair in q
+        push!(dict, pair)
+    end
+    return dict
+end
+
 function Base.pop!(dict::AVLDict{K,D}) where {K,D}
     node = pop!(dict.tree)
     return node.key => node.data
@@ -264,4 +277,46 @@ function Base.isequal(d1::AVLDict, d2::AVLDict)
         end
     end
     return true
+end
+
+# merge and mergewith implementations
+function Base.merge(d::AVLDict{K,D}, others::AbstractDict...) where {K,D}
+    result = copy(d)
+    for other in others
+        for (k, v) in other
+            result[k] = v
+        end
+    end
+    return result
+end
+
+function Base.merge(combine::Function, d::AVLDict{K,D}, others::AbstractDict...) where {K,D}
+    result = copy(d)
+    for other in others
+        for (k, v) in other
+            if haskey(result, k)
+                result[k] = combine(result[k], v)
+            else
+                result[k] = v
+            end
+        end
+    end
+    return result
+end
+
+function Base.mergewith(combine::Function, d::AVLDict{K,D}, others::AbstractDict...) where {K,D}
+    return merge(combine, d, others...)
+end
+
+function Base.mergewith!(combine::Function, d::AVLDict{K,D}, others::AbstractDict...) where {K,D}
+    for other in others
+        for (k, v) in other
+            if haskey(d, k)
+                d[k] = combine(d[k], v)
+            else
+                d[k] = v
+            end
+        end
+    end
+    return d
 end

@@ -20,6 +20,9 @@ import Base:
     iterate,
     last,
     length,
+    merge,
+    mergewith,
+    mergewith!,
     pop!,
     popfirst!,
     popfirst!,
@@ -28,7 +31,7 @@ import Base:
     show,
     similar,
     sizehint!,
-    :(==)
+    ==
 
 include("node.jl")
 include("tree.jl")
