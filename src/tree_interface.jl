@@ -2,8 +2,6 @@ Base.eltype(::Type{AVLTree{K,V}}) where {K,V} = Tuple{K,V}
 
 Base.length(t::AVLTree{K,V}) where {K,V} = __size(t.root)
 Base.isempty(t::AVLTree{K,V}) where {K,V} = t.root === nothing
-Base.size(t::AVLTree) = (length(t),)
-Base.size(t::AVLTree, d::Integer) = d == 1 ? length(t) : 1
 @inline __size(node::Node) = __size(node.left) + __size(node.right) + 1
 @inline __size(node::Nothing) = return 0
 

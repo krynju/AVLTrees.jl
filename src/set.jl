@@ -228,7 +228,7 @@ function _set_equal(s1::AVLSet, s2::AVLSet)
         return false
     end
     for item in s1
-        if !in(item, s2)
+        if !haskey(s2.tree, item)
             return false
         end
     end

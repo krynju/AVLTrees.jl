@@ -220,72 +220,25 @@ function Base.empty!(d::AVLDict{K,D}) where {K,D}
     return d
 end
 
-function Base.:(==)(d1::AVLDict{K,D}, d2::AVLDict{K,D}) where {K,D}
-    if length(d1) != length(d2)
-        return false
-    end
-    for (k, v) in d1
-        if !haskey(d2, k)
-            return false
-        end
-        # Check equality, allowing missing and NaN to propagate
-        eq = d2[k] == v
-        if eq === false
-            return false
-        elseif eq !== true && eq !== missing
-            # Handle other falsy values but not missing
-            return false
-        end
-    end
-    # If we get here, all values were equal or missing
-    # Check if any comparison resulted in missing
-    for (k, v) in d1
-        eq = d2[k] == v
-        if eq === missing
-            return missing
-        end
-    end
-    return true
-end
-
 function Base.:(==)(d1::AVLDict, d2::AVLDict)
     if length(d1) != length(d2)
         return false
     end
+    has_missing = false
     for (k, v) in d1
         if !haskey(d2, k)
             return false
         end
-        # Check equality, allowing missing and NaN to propagate
         eq = d2[k] == v
         if eq === false
             return false
-        elseif eq !== true && eq !== missing
-            # Handle other falsy values but not missing
+        elseif eq === missing
+            has_missing = true
+        elseif eq !== true
             return false
         end
     end
-    # If we get here, all values were equal or missing
-    # Check if any comparison resulted in missing
-    for (k, v) in d1
-        eq = d2[k] == v
-        if eq === missing
-            return missing
-        end
-    end
-    return true
-end
-
-function Base.isequal(d1::AVLDict{K,D}, d2::AVLDict{K,D}) where {K,D}
-    if length(d1) != length(d2)
-        return false
-    end
-    for (k, v) in d1
-        if !haskey(d2, k) || !isequal(d2[k], v)
-            return false
-        end
-    end
-    return true
+    return has_missing ? missing : true
 end
 
 function Base.isequal(d1::AVLDict, d2::AVLDict)

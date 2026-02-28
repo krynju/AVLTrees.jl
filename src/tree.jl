@@ -78,6 +78,26 @@ end
     return tree
 end
 
+# Special case for Nothing keys (Nothing doesn't support < comparison)
+function insert_node!(tree::AVLTree{Nothing,V}, key::Nothing, data::V) where {V}
+    if tree.root === nothing
+        tree.root = Node{Nothing,V}(key, data)
+    else
+        tree.root.data = data
+    end
+    return tree
+end
+
+# Special case for Missing keys (Missing doesn't support < comparison)
+function insert_node!(tree::AVLTree{Missing,V}, key::Missing, data::V) where {V}
+    if tree.root === nothing
+        tree.root = Node{Missing,V}(key, data)
+    else
+        tree.root.data = data
+    end
+    return tree
+end
+
 @inline function balance_insertion(
     tree::AVLTree{K,V}, node::Node{K,V}, left_insertion::Bool
 ) where {K,V}

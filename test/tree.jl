@@ -7,11 +7,11 @@
         @test t.root.bf == 0
         @test t.root.right === nothing && t.root.left === nothing
         @test t.root.key == 1 && t.root.data == 2
-        @test size(t) == 1
+        @test length(t) == 1
         insert!(t, 1, 10)
         delete!(t, 999)
         @test t.root.data == 10
-        @test size(t) == 1
+        @test length(t) == 1
     end
 
     @testset "left rotation test" begin
@@ -21,7 +21,7 @@
         insert!(t, 3, 2)
         @test t.root.bf == 0 && t.root.left.bf == 0 && t.root.right.bf == 0
         @test t.root.key == 2 && t.root.left.key == 1 && t.root.right.key == 3
-        @test size(t) == 3
+        @test length(t) == 3
     end
 
     @testset "right rotation test" begin
@@ -31,7 +31,7 @@
         insert!(t, 1, 2)
         @test t.root.bf == 0 && t.root.left.bf == 0 && t.root.right.bf == 0
         @test t.root.key == 2 && t.root.left.key == 1 && t.root.right.key == 3
-        @test size(t) == 3
+        @test length(t) == 3
     end
 
     @testset "left-right rotation test" begin
@@ -41,7 +41,7 @@
         insert!(t, 2, 2)
         @test t.root.bf == 0 && t.root.left.bf == 0 && t.root.right.bf == 0
         @test t.root.key == 2 && t.root.left.key == 1 && t.root.right.key == 3
-        @test size(t) == 3
+        @test length(t) == 3
     end
 
     @testset "right-left rotation test" begin
@@ -51,7 +51,7 @@
         insert!(t, 2, 2)
         @test t.root.bf == 0 && t.root.left.bf == 0 && t.root.right.bf == 0
         @test t.root.key == 2 && t.root.left.key == 1 && t.root.right.key == 3
-        @test size(t) == 3
+        @test length(t) == 3
     end
 
     @testset "tree{Any,Any} test" begin
@@ -61,7 +61,7 @@
         insert!(t, "item2", "item2")
         insert!(t, "item3", "item3")
         @test t.root.key == "item2"
-        @test size(t) == 3
+        @test length(t) == 3
     end
 
     @testset "fill test" begin
@@ -69,7 +69,7 @@
         for i in rand(Int64, 100)
             insert!(t, i, 0)
         end
-        @test size(t) <= 100
+        @test length(t) <= 100
     end
 
     @testset "delete basic" begin
@@ -77,17 +77,17 @@
         insert!(t, 1, 2)
         insert!(t, 2, 2)
         insert!(t, 3, 2)
-        @test size(t) == 3
+        @test length(t) == 3
         AVLTrees.delete_node!(t, t.root.left)
         @test t.root.left === nothing
         @test t.root.bf == 1
-        @test size(t) == 2
+        @test length(t) == 2
         AVLTrees.delete_node!(t, t.root.right)
         @test t.root.right === nothing
         @test t.root.bf == 0
-        @test size(t) == 1
+        @test length(t) == 1
         AVLTrees.delete_node!(t, t.root)
-        @test size(t) == 0
+        @test length(t) == 0
         @test t.root === nothing
     end
 
@@ -96,12 +96,12 @@
         for i in rand(Int64, 100)
             insert!(t, i, 0)
         end
-        @test size(t) <= 100
+        @test length(t) <= 100
         while t.root !== nothing
             AVLTrees.delete_node!(t, t.root)
         end
         @test t.root === nothing
-        @test size(t) == 0
+        @test length(t) == 0
     end
 
     @testset "fill and delete keys test" begin
@@ -110,11 +110,11 @@
         for i in nums
             insert!(t, i, i)
         end
-        @test size(t) <= 100
+        @test length(t) <= 100
         for i in nums
             delete!(t, i)
         end
-        @test size(t) == 0
+        @test length(t) == 0
         @test t.root === nothing
     end
 
@@ -123,10 +123,10 @@
         for i in 1:1000
             insert!(t, i, i)
         end
-        @test size(t) == 1000
+        @test length(t) == 1000
         @test 500 == getkey(t, 500, nothing)
         @test nothing === getkey(t, 1001, nothing)
-        @test size(t) == 1000
+        @test length(t) == 1000
     end
 
     @testset "iteration test" begin
