@@ -14,5 +14,5 @@ Node(key::K, data::V) where {K,V} = Node{K,V}(key, data)
 Node(key::K, data::V, parent::Union{Node{K,V},Nothing}) where {K,V} = Node{K,V}(key, data, parent)
 
 function Base.show(io::IO, ::MIME"text/plain", node::Node{K,V}) where {K,V}
-    return print(io, "Node{$(K),$(D)}: $(node.key) -> $(node.data)")
+    return print(io, "Node{$(K),$(V)}: $(node.key) -> $(node.data)")
 end

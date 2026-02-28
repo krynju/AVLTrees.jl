@@ -131,11 +131,11 @@ end
 
 function Base.pop!(t::AVLTree{K,V}) where {K,V}
     node = t.root
-    node === nothing && ArgumentError("Tree must be non-empty")
-    while node !== nothing
+    node === nothing && throw(ArgumentError("Tree must be non-empty"))
+    while node.right !== nothing
         node = node.right
     end
-    temp = node
+    temp = node.data
     delete_node!(t, node)
     return temp
 end
@@ -147,9 +147,10 @@ function Base.pop!(t::AVLTree{K,V}, k::K) where {K,V}
     node = find_node(t, k)
 
     if node !== nothing
-        temp = node
+        saved_key = node.key
+        saved_data = node.data
         delete_node!(t, node)
-        return temp
+        return Node{K,V}(saved_key, saved_data)
     else
         throw(KeyError("Key doesn't exist"))
     end
@@ -158,9 +159,10 @@ end
 function Base.pop!(t::AVLTree{K,V}, k::K, default) where {K,V}
     node = find_node(t, k)
     if node !== nothing
-        temp = node
+        saved_key = node.key
+        saved_data = node.data
         delete_node!(t, node)
-        return temp
+        return Node{K,V}(saved_key, saved_data)
     else
         return default
     end
@@ -182,7 +184,7 @@ function Base.print(io::IO, t::AVLTree{K,V}) where {K,V}
     for (k, v) in Base.Iterators.take(t, 10)
         push!(str_lst, "$k => $v")
     end
-    print(io, "AVLTree{$K,$D}(")
+    print(io, "AVLTree{$K,$V}(")
     print(io, join(str_lst, ", "))
     length(str_lst) == 10 && print(io, ", ⋯ ")
     return print(io, ")")
