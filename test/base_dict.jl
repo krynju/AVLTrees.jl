@@ -369,16 +369,16 @@ end
 
 @testset "keys, values, pairs" begin
     d = AVLDict(1 => 2, 3 => 4, 5 => 6)
-    
+
     k = collect(keys(d))
     @test sort(k) == [1, 3, 5]
-    
+
     v = collect(values(d))
     @test sort(v) == [2, 4, 6]
-    
+
     p = collect(pairs(d))
     @test sort(p, by = x -> x.first) == [1 => 2, 3 => 4, 5 => 6]
-    
+
     # Test that keys/values/pairs work with iteration
     @test sum(keys(d)) == 9
     @test sum(values(d)) == 12
@@ -386,17 +386,17 @@ end
 
 @testset "filter and filter!" begin
     d = AVLDict(1 => 2, 2 => 4, 3 => 6, 4 => 8)
-    
+
     # Test filter (returns new dict)
     d2 = filter(p -> p.second > 4, d)
     @test d2 isa AVLDict{Int,Int}
     @test d2 == AVLDict(3 => 6, 4 => 8)
     @test d == AVLDict(1 => 2, 2 => 4, 3 => 6, 4 => 8)  # original unchanged
-    
+
     # Test filter with key/value function
     d3 = filter(p -> p.first > 2, d)
     @test d3 == AVLDict(3 => 6, 4 => 8)
-    
+
     # Test filter! (in-place)
     d4 = AVLDict(1 => 2, 2 => 4, 3 => 6, 4 => 8)
     filter!(p -> iseven(p.first), d4)
@@ -407,11 +407,11 @@ end
     d = AVLDict(1 => 2)
     push!(d, 3 => 4)
     @test d == AVLDict(1 => 2, 3 => 4)
-    
+
     # Test push! with multiple pairs
     push!(d, 5 => 6, 7 => 8)
     @test d == AVLDict(1 => 2, 3 => 4, 5 => 6, 7 => 8)
-    
+
     # Test push! overwrites existing key
     push!(d, 1 => 99)
     @test d[1] == 99
