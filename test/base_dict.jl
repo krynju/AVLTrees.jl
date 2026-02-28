@@ -326,9 +326,22 @@ end
 
 @testset "getkey" begin
     h = AVLDict(1 => 2, 3 => 6, 5 => 10)
-    @test getkey(h, 1, 7) == 2
+    @test getkey(h, 1, 7) == 1
     @test getkey(h, 4, 6) == 6
     @test getkey(h, "1", 8) == 8
+end
+
+@testset "pop! semantics" begin
+    d = AVLDict(1 => 10, 2 => 20, 3 => 30)
+    @test pop!(d, 2) == 20
+    @test !haskey(d, 2)
+    @test_throws KeyError pop!(d, 999)
+    @test pop!(d, 999, -1) == -1
+
+    top = pop!(d)
+    @test top isa Pair
+    @test top.first isa Int
+    @test top.second isa Int
 end
 
 @testset "merge and merge!" begin

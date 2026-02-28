@@ -109,7 +109,7 @@ function AVLDict{K,V}(ps::Pair{K,V}...) where {K,V}
     return AVLDict{K,V}(t)
 end
 
-Base.haskey(dict::AVLDict{K,D}, k::K) where {K,D} = haskey(dict.tree, k)
+Base.haskey(dict::AVLDict{K,D}, k) where {K,D} = haskey(dict.tree, k)
 
 Base.get(dict::AVLDict{K,D}, k, default) where {K,D} = get(dict.tree, k, default)
 Base.get(f::Function, dict::AVLDict{K,D}, k) where {K,D} = get(f, dict.tree, k)
@@ -124,10 +124,21 @@ end
 Base.getindex(dict::AVLDict{K,D}, k::K) where {K,D} = getindex(dict.tree, k)
 
 function Base.getkey(dict::AVLDict{K,D}, k) where {K,D}
-    if k isa K && haskey(dict.tree, k)
-        return dict.tree[k]
+    typed_key = if k isa K
+        k
+    else
+        try
+            convert(K, k)
+        catch e
+            if e isa MethodError || e isa TypeError || e isa InexactError
+                throw(KeyError(k))
+            end
+            rethrow()
+        end
     end
-    throw(KeyError(k))
+    node = find_node(dict.tree, typed_key)
+    node === nothing && throw(KeyError(k))
+    return node.key
 end
 
 Base.getkey(dict::AVLDict{K,D}, k, default) where {K,D} = getkey(dict.tree, k, default)
@@ -150,22 +161,33 @@ function Base.push!(dict::AVLDict{K,D}, p::Pair, q::Pair...) where {K,D}
 end
 
 function Base.pop!(dict::AVLDict{K,D}) where {K,D}
-    node = pop!(dict.tree)
-    return node.key => node.data
+    node = dict.tree.root
+    node === nothing && throw(ArgumentError("dict must be non-empty"))
+    while node.right !== nothing
+        node = node.right
+    end
+    saved_key = node.key
+    saved_data = node.data
+    delete_node!(dict.tree, node)
+    return saved_key => saved_data
 end
 
 function Base.pop!(dict::AVLDict{K,D}, k::K) where {K,D}
-    node = pop!(dict.tree, k)
-    return k => node.data
+    node = find_node(dict.tree, k)
+    node === nothing && throw(KeyError(k))
+    saved_data = node.data
+    delete_node!(dict.tree, node)
+    return saved_data
 end
 
 function Base.pop!(dict::AVLDict{K,D}, k::K, default) where {K,D}
-    node = pop!(dict.tree, k, default)
-    if node isa Node
-        k => node.data
-    else
-        default
+    node = find_node(dict.tree, k)
+    if node === nothing
+        return default
     end
+    saved_data = node.data
+    delete_node!(dict.tree, node)
+    return saved_data
 end
 
 function Base.iterate(dict::AVLDict)

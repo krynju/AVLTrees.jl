@@ -129,6 +129,20 @@
         @test length(t) == 1000
     end
 
+    @testset "get/getkey semantics" begin
+        t = AVLTree{Int,String}()
+        insert!(t, 1, "one")
+        insert!(t, 2, "two")
+
+        @test get(t, 1, "default") == "one"
+        @test get(t, 9, "default") == "default"
+        @test get(t, "1", "default") == "default"
+
+        @test getkey(t, 1, 99) == 1
+        @test getkey(t, 9, 99) == 99
+        @test getkey(t, "1", 99) == 99
+    end
+
     @testset "iteration test" begin
         t = AVLTree{Int64,Int64}()
         for i in 1:1000
@@ -282,6 +296,9 @@
         @test 5 in t
         @test !(10 in t)
         @test !(0 in t)
+        @test haskey(t, 3.0)
+        @test !haskey(t, 3.5)
+        @test !haskey(t, "3")
     end
 
     @testset "special key types" begin
