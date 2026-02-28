@@ -117,12 +117,12 @@ end
     # Note: Type stability test removed. The generic AVLDict(kv) constructor
     # handles many input types with complex branching, making type stability difficult.
     # This is a performance optimization, not a correctness issue.
-    d = AVLDict(i=>i for i=1:3)
+    d = AVLDict(i => i for i in 1:3)
     @test isa(d, AVLDict{Int,Int})
-    @test d == AVLDict(1=>1, 2=>2, 3=>3)
-    d = AVLDict(i==1 ? (1=>2) : (2.0=>3.0) for i=1:2)
+    @test d == AVLDict(1 => 1, 2 => 2, 3 => 3)
+    d = AVLDict(i == 1 ? (1 => 2) : (2.0 => 3.0) for i in 1:2)
     @test isa(d, AVLDict{Real,Real})
-    @test d == AVLDict{Real,Real}(2.0=>3.0, 1=>2)
+    @test d == AVLDict{Real,Real}(2.0 => 3.0, 1 => 2)
 
     # Note: AVL trees require comparable keys.
     # Mixed key types (Int and String) can't be tested as they're not comparable with <
@@ -134,15 +134,15 @@ end
 end
 
 @testset "type of AVLDict constructed from varargs of Pairs" begin
-    @test AVLDict(1=>1, 2=>2.0) isa AVLDict{Int,Real}
-    @test AVLDict(1=>1, 2.0=>2) isa AVLDict{Real,Int}
-    @test AVLDict(1=>1.0, 2.0=>2) isa AVLDict{Real,Real}
+    @test AVLDict(1 => 1, 2 => 2.0) isa AVLDict{Int,Real}
+    @test AVLDict(1 => 1, 2.0 => 2) isa AVLDict{Real,Int}
+    @test AVLDict(1 => 1.0, 2.0 => 2) isa AVLDict{Real,Real}
 
     # Note: AVL trees require comparable keys. Nothing and Missing don't have < operator.
     # Testing values with Nothing/Missing is OK:
     for T in (Nothing, Missing)
-        @test AVLDict(1=>1, 2=>T()) isa AVLDict{Int,Union{Int,T}}
-        @test AVLDict(1=>T(), 2=>2) isa AVLDict{Int,Union{Int,T}}
+        @test AVLDict(1 => 1, 2 => T()) isa AVLDict{Int,Union{Int,T}}
+        @test AVLDict(1 => T(), 2 => 2) isa AVLDict{Int,Union{Int,T}}
         # These tests use Nothing/Missing as keys, which is incompatible with AVL trees:
         # @test AVLDict(1=>1, T()=>2) isa AVLDict{Union{Int,T},Int}
         # @test AVLDict(T()=>1, 2=>2) isa AVLDict{Union{Int,T},Int}
@@ -163,8 +163,8 @@ end
     bestkey(d, key) = key
     bestkey(d::AVLDict{K,V}, key) where {K<:AbstractString,V} = string(key)
     bar(x) = bestkey(x, :y)
-    @test bar(AVLDict(:x => [1,2,5])) === :y
-    @test bar(AVLDict("x" => [1,2,5])) == "y"
+    @test bar(AVLDict(:x => [1, 2, 5])) === :y
+    @test bar(AVLDict("x" => [1, 2, 5])) == "y"
 end
 
 mutable struct I1438T
@@ -377,7 +377,7 @@ end
     @test sort(v) == [2, 4, 6]
 
     p = collect(pairs(d))
-    @test sort(p, by = x -> x.first) == [1 => 2, 3 => 4, 5 => 6]
+    @test sort(p; by=x -> x.first) == [1 => 2, 3 => 4, 5 => 6]
 
     # Test that keys/values/pairs work with iteration
     @test sum(keys(d)) == 9

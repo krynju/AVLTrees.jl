@@ -223,7 +223,7 @@
     @testset "pop! variations" begin
         # pop!() - remove maximum
         t = AVLTree{Int,Int}()
-        foreach(i -> insert!(t, i, i*10), [5, 3, 8, 1, 4, 7, 9])
+        foreach(i -> insert!(t, i, i * 10), [5, 3, 8, 1, 4, 7, 9])
 
         @test pop!(t) == 90
         @test !haskey(t, 9)
@@ -359,7 +359,7 @@
     @testset "deletion of non-existent keys" begin
         t = AVLTree{Int,Int}()
         for i in 1:5
-            insert!(t, i, i*10)
+            insert!(t, i, i * 10)
         end
 
         # Delete non-existent key should not change tree
@@ -401,14 +401,14 @@
         # Insert in random order (using randperm from Random stdlib)
         keys = randperm(n)
         for k in keys
-            insert!(t, k, k*2)
+            insert!(t, k, k * 2)
         end
         @test length(t) == n
 
         # Verify all keys present
         for k in 1:n
             @test haskey(t, k)
-            @test t[k] == k*2
+            @test t[k] == k * 2
         end
 
         # Delete half the keys

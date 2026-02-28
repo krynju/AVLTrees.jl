@@ -17,7 +17,7 @@ AVLDict() = AVLDict{Any,Any}()
 function AVLDict(kv)
     try
         # Infer types from the eltype of the iterable
-        if isa(kv, Union{AbstractArray, Tuple}) || Base.IteratorSize(typeof(kv)) isa Base.HasShape
+        if isa(kv, Union{AbstractArray,Tuple}) || Base.IteratorSize(typeof(kv)) isa Base.HasShape
             et = eltype(kv)
             if et <: Pair
                 # Extract K, V from Pair{K,V}
@@ -304,11 +304,11 @@ function Base.merge(combine::Function, d::AVLDict{K,D}, others::AbstractDict...)
     return result
 end
 
-function Base.mergewith(combine::Function, d::AVLDict{K,D}, others::AbstractDict...) where {K,D}
+function mergewith(combine::Function, d::AVLDict{K,D}, others::AbstractDict...) where {K,D}
     return merge(combine, d, others...)
 end
 
-function Base.mergewith!(combine::Function, d::AVLDict{K,D}, others::AbstractDict...) where {K,D}
+function mergewith!(combine::Function, d::AVLDict{K,D}, others::AbstractDict...) where {K,D}
     for other in others
         for (k, v) in other
             if haskey(d, k)

@@ -21,8 +21,6 @@ import Base:
     last,
     length,
     merge,
-    mergewith,
-    mergewith!,
     pop!,
     popfirst!,
     popfirst!,
@@ -32,6 +30,10 @@ import Base:
     similar,
     sizehint!,
     ==
+
+if VERSION >= v"1.5"
+    import Base: mergewith, mergewith!
+end
 
 include("node.jl")
 include("tree.jl")
