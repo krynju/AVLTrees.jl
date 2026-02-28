@@ -363,7 +363,7 @@ end
 
     # Test mergewith!
     d11 = AVLDict(1 => 2, 2 => 3)
-    mergewith!(+, d11, AVLDict(2 => 4, 3 => 5))
+    AVLTrees.mergewith!(+, d11, AVLDict(2 => 4, 3 => 5))
     @test d11 == AVLDict(1 => 2, 2 => 7, 3 => 5)
 end
 
