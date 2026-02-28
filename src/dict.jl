@@ -116,7 +116,10 @@ Base.get(f::Function, dict::AVLDict{K,D}, k) where {K,D} = get(f, dict.tree, k)
 Base.get!(dict::AVLDict{K,D}, k::K, default) where {K,D} = get!(dict.tree, k, default)
 Base.get!(f::Function, dict::AVLDict{K,D}, k::K) where {K,D} = get!(f, dict.tree, k)
 
-Base.delete!(dict::AVLDict{K,D}, k::K) where {K,D} = delete!(dict.tree, k)
+function Base.delete!(dict::AVLDict{K,D}, k::K) where {K,D}
+    delete!(dict.tree, k)
+    return dict
+end
 
 Base.getindex(dict::AVLDict{K,D}, k::K) where {K,D} = getindex(dict.tree, k)
 
