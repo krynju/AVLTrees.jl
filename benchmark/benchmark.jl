@@ -41,34 +41,35 @@ function prepare_t_delete(t)
     t
 end
 
-# for attempt in 1:3
-#     for N in x
-#         global t = AVLTree{Int64,Int64}()
-#         rng = MersenneTwister(1111)
-#         global nums_fill = rand(rng, Int64, N)
-#         nn = 100
-#         global nums_test = rand(rng, Int64, nn)
+for attempt in 1:3
+    for N in x
+        global t = AVLTree{Int64,Int64}()
+        rng = MersenneTwister(1111)
+        global nums_fill = rand(rng, Int64, N)
+        nn = 100
+        global nums_test = rand(rng, Int64, nn)
 
-#         for i in nums_fill
-#             insert!(t, i, i)
-#         end
+        for i in nums_fill
+            insert!(t, i, i)
+        end
 
-#         insertion = @benchmark batch_insert!(_t, $nums_test) evals=1 setup=(_t=prepare_t_insert($t))
-#         deletion = @benchmark batch_delete!(_t, $nums_test) evals=1 setup=(_t=prepare_t_delete($t))
+        insertion = @benchmark batch_insert!(_t, $nums_test) evals=1 setup=(_t=prepare_t_insert($t))
+        deletion = @benchmark batch_delete!(_t, $nums_test) evals=1 setup=(_t=prepare_t_delete($t))
 
-#         batch_insert!(t, nums_test)
-#         search = @benchmark batch_find($t, $nums_test) evals=1
+        batch_insert!(t, nums_test)
+        search = @benchmark batch_find($t, $nums_test) evals=1
 
-#         push!(d, ("insert", minimum(insertion).time/nn, N))
-#         push!(d, ("delete", minimum(deletion).time/nn,N))
-#         push!(d, ("search", minimum(search).time/nn,N))
-#         println("done $N")
-#     end
-# end
+        push!(d, ("insert", minimum(insertion).time/nn, N))
+        push!(d, ("delete", minimum(deletion).time/nn,N))
+        push!(d, ("search", minimum(search).time/nn,N))
+        println("done $N")
+    end
+end
 
-# c = combine(groupby(d, [:op,:n]), :time => minimum)
+c = combine(groupby(d, [:op,:n]), :time => minimum)
 
-c = CSV.read("benchmark/results.csv", DataFrame)
+# c = CSV.read("benchmark/results.csv", DataFrame)
+
 plot(
     x,
     [c[(c.op.=="insert"),:].time_minimum,c[(c.op.=="delete"),:].time_minimum, c[(c.op.=="search"),:].time_minimum],
