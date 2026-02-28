@@ -113,15 +113,15 @@ Base.haskey(dict::AVLDict{K,D}, k) where {K,D} = haskey(dict.tree, k)
 
 Base.get(dict::AVLDict{K,D}, k, default) where {K,D} = get(dict.tree, k, default)
 Base.get(f::Function, dict::AVLDict{K,D}, k) where {K,D} = get(f, dict.tree, k)
-Base.get!(dict::AVLDict{K,D}, k::K, default) where {K,D} = get!(dict.tree, k, default)
-Base.get!(f::Function, dict::AVLDict{K,D}, k::K) where {K,D} = get!(f, dict.tree, k)
+Base.get!(dict::AVLDict{K,D}, k, default) where {K,D} = get!(dict.tree, k, default)
+Base.get!(f::Function, dict::AVLDict{K,D}, k) where {K,D} = get!(f, dict.tree, k)
 
-function Base.delete!(dict::AVLDict{K,D}, k::K) where {K,D}
+function Base.delete!(dict::AVLDict{K,D}, k) where {K,D}
     delete!(dict.tree, k)
     return dict
 end
 
-Base.getindex(dict::AVLDict{K,D}, k::K) where {K,D} = getindex(dict.tree, k)
+Base.getindex(dict::AVLDict{K,D}, k) where {K,D} = getindex(dict.tree, k)
 
 function Base.getkey(dict::AVLDict{K,D}, k) where {K,D}
     typed_key = if k isa K
@@ -145,7 +145,10 @@ Base.getkey(dict::AVLDict{K,D}, k, default) where {K,D} = getkey(dict.tree, k, d
 Base.isempty(dict::AVLDict) = isempty(dict.tree)
 Base.length(dict::AVLDict) = length(dict.tree)
 
-Base.setindex!(dict::AVLDict{K,D}, d::D, k::K) where {K,D} = setindex!(dict.tree, d, k)
+function Base.setindex!(dict::AVLDict{K,D}, d::D, k) where {K,D}
+    setindex!(dict.tree, d, k)
+    return d
+end
 
 function Base.push!(dict::AVLDict{K,D}, p::Pair) where {K,D}
     dict[p.first] = p.second
@@ -172,18 +175,31 @@ function Base.pop!(dict::AVLDict{K,D}) where {K,D}
     return saved_key => saved_data
 end
 
-function Base.pop!(dict::AVLDict{K,D}, k::K) where {K,D}
-    node = find_node(dict.tree, k)
-    node === nothing && throw(KeyError(k))
-    saved_data = node.data
-    delete_node!(dict.tree, node)
-    return saved_data
-end
-
-function Base.pop!(dict::AVLDict{K,D}, k::K, default) where {K,D}
-    node = find_node(dict.tree, k)
+function Base.pop!(dict::AVLDict{K,D}, k, default_unused...) where {K,D}
+    has_default = !isempty(default_unused)
+    typed_key = if k isa K
+        k
+    else
+        try
+            convert(K, k)
+        catch e
+            if e isa MethodError || e isa TypeError || e isa InexactError
+                if has_default
+                    return default_unused[1]
+                else
+                    throw(KeyError(k))
+                end
+            end
+            rethrow()
+        end
+    end
+    node = find_node(dict.tree, typed_key)
     if node === nothing
-        return default
+        if has_default
+            return default_unused[1]
+        else
+            throw(KeyError(k))
+        end
     end
     saved_data = node.data
     delete_node!(dict.tree, node)

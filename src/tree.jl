@@ -346,16 +346,15 @@ function printtree(tree::AVLTree)
 end
 
 function height(tree::AVLTree)
-    isempty(tree) && return 0
-    return height(tree.root, 0)
+    return height(tree.root)
 end
 
-function height(node::Node, level)
-    l = height(node.left, level)
-    r = height(node.right, level)
-    return maximum([l, r]) + 1
+function height(node::Node)
+    l = height(node.left)
+    r = height(node.right)
+    return max(l, r) + 1
 end
 
-function height(node::Nothing, level)
-    return level
+function height(node::Nothing)
+    return 0
 end

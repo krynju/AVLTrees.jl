@@ -182,7 +182,7 @@
         @test popfirst!(t) == -10
         @test firstindex(t) == 1
         t[10] = 10
-        @test getproperty.(pop!.(Ref(t), 1:100), :data) == 1:100
+        @test pop!.(Ref(t), 1:100) == 1:100
     end
 
     @testset "get with default and function" begin
@@ -248,16 +248,16 @@
         @test length(t) == 5
 
         # pop!(key) - remove specific key
-        node = pop!(t, 3)
-        @test node.data == 30
+        value = pop!(t, 3)
+        @test value == 30
         @test !haskey(t, 3)
         @test length(t) == 4
 
         @test_throws KeyError pop!(t, 99)
 
         # pop!(key, default) - with default
-        node2 = pop!(t, 5, nothing)
-        @test node2.data == 50
+        value2 = pop!(t, 5, nothing)
+        @test value2 == 50
         @test !haskey(t, 5)
         @test pop!(t, 99, nothing) === nothing
         @test length(t) == 3

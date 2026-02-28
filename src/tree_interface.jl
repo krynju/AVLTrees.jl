@@ -22,13 +22,31 @@ Base.isempty(t::AVLTree{K,V}) where {K,V} = t.root === nothing
 end
 Base.in(k, t::AVLTree{K,V}) where {K,V} = haskey(t, k)
 
-Base.setindex!(tree::AVLTree{K,V}, v::V, k::K) where {K,V} = insert!(tree, k, v)
-Base.setindex!(tree::AVLTree{K,V}, v::V, k::Any) where {K,V} = insert!(tree, convert(K, k), v)
+function Base.setindex!(tree::AVLTree{K,V}, v::V, k::K) where {K,V}
+    insert!(tree, k, v)
+    return v
+end
+function Base.setindex!(tree::AVLTree{K,V}, v::V, k::Any) where {K,V}
+    insert!(tree, convert(K, k), v)
+    return v
+end
 
 Base.insert!(tree::AVLTree{K,V}, k::K, v::V) where {K,V} = insert_node!(tree, k, v)
 
-function Base.delete!(tree::AVLTree{K,V}, key::K) where {K,V}
-    node = find_node(tree, key)
+function Base.delete!(tree::AVLTree{K,V}, key) where {K,V}
+    typed_key = if key isa K
+        key
+    else
+        try
+            convert(K, key)
+        catch e
+            if e isa MethodError || e isa TypeError || e isa InexactError
+                return tree
+            end
+            rethrow()
+        end
+    end
+    node = find_node(tree, typed_key)
     if node !== nothing
         delete_node!(tree, node)
     end
@@ -65,29 +83,67 @@ function Base.get(f::Function, t::AVLTree{K,V}, k::K) where {K,V}
     end
 end
 
-function Base.get!(t::AVLTree{K,V}, k::K, default) where {K,V}
-    node = find_node(t, k)
+function Base.get!(t::AVLTree{K,V}, k, default) where {K,V}
+    typed_key = if k isa K
+        k
+    else
+        try
+            convert(K, k)
+        catch e
+            if e isa MethodError || e isa TypeError || e isa InexactError
+                return default
+            end
+            rethrow()
+        end
+    end
+    node = find_node(t, typed_key)
     if node === nothing
-        insert!(t, k, default)
+        insert!(t, typed_key, default)
         return default
     else
         return node.data
     end
 end
 
-function Base.get!(f::Function, t::AVLTree{K,V}, k::K) where {K,V}
-    node = find_node(t, k)
+function Base.get!(f::Function, t::AVLTree{K,V}, k) where {K,V}
+    typed_key = if k isa K
+        k
+    else
+        try
+            convert(K, k)
+        catch e
+            if e isa MethodError || e isa TypeError || e isa InexactError
+                d = f()
+                insert!(t, convert(K, k), d)
+                return d
+            end
+            rethrow()
+        end
+    end
+    node = find_node(t, typed_key)
     if node === nothing
         d = f()
-        insert!(t, k, d)
+        insert!(t, typed_key, d)
         return d
     else
         return node.data
     end
 end
 
-function Base.getindex(t::AVLTree{K,V}, k::K) where {K,V}
-    node = find_node(t, k)
+function Base.getindex(t::AVLTree{K,V}, k) where {K,V}
+    typed_key = if k isa K
+        k
+    else
+        try
+            convert(K, k)
+        catch e
+            if e isa MethodError || e isa TypeError || e isa InexactError
+                throw(KeyError(k))
+            end
+            rethrow()
+        end
+    end
+    node = find_node(t, typed_key)
     if node === nothing
         throw(KeyError(k))
     else
@@ -172,29 +228,47 @@ function Base.pop!(t::AVLTree{K,V}) where {K,V}
     return temp
 end
 
-function Base.pop!(t::AVLTree{K,V}, k::K) where {K,V}
-    if isempty(t)
-        throw(ArgumentError("Tree must be non-empty"))
+function Base.pop!(t::AVLTree{K,V}, k) where {K,V}
+    typed_key = if k isa K
+        k
+    else
+        try
+            convert(K, k)
+        catch e
+            if e isa MethodError || e isa TypeError || e isa InexactError
+                throw(KeyError(k))
+            end
+            rethrow()
+        end
     end
-    node = find_node(t, k)
-
+    node = find_node(t, typed_key)
     if node !== nothing
-        saved_key = node.key
         saved_data = node.data
         delete_node!(t, node)
-        return Node{K,V}(saved_key, saved_data)
+        return saved_data
     else
         throw(KeyError(k))
     end
 end
 
-function Base.pop!(t::AVLTree{K,V}, k::K, default) where {K,V}
-    node = find_node(t, k)
+function Base.pop!(t::AVLTree{K,V}, k, default) where {K,V}
+    typed_key = if k isa K
+        k
+    else
+        try
+            convert(K, k)
+        catch e
+            if e isa MethodError || e isa TypeError || e isa InexactError
+                return default
+            end
+            rethrow()
+        end
+    end
+    node = find_node(t, typed_key)
     if node !== nothing
-        saved_key = node.key
         saved_data = node.data
         delete_node!(t, node)
-        return Node{K,V}(saved_key, saved_data)
+        return saved_data
     else
         return default
     end
